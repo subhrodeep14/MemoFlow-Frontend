@@ -1,52 +1,281 @@
-// src/App.jsx
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import useAuthStore from './hooks/useAuth';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-50">
-      <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+import {
+  useEffect,
+} from "react";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
+import {
+  Toaster,
+} from "react-hot-toast";
+
+import useAuthStore from "./hooks/useAuth";
+
+/*
+PAGES
+*/
+
+import LoginPage from "./pages/LoginPage";
+
+import DashboardPage from "./pages/DashboardPage";
+
+import CompanyManagementPage from "./pages/CompanyManagementPage";
+
+/*
+──────────────────────────────────────
+LOADER
+──────────────────────────────────────
+*/
+
+function FullScreenLoader() {
+  return (
+    <div
+      className="
+        min-h-screen
+
+        flex
+        items-center
+        justify-center
+
+        bg-slate-50
+        dark:bg-slate-950
+      "
+    >
+      <div
+        className="
+          w-10
+          h-10
+
+          rounded-full
+
+          border-[3px]
+          border-indigo-600
+          border-t-transparent
+
+          animate-spin
+        "
+      />
     </div>
   );
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
-function PublicRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
-  if (isLoading) return null;
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
+/*
+──────────────────────────────────────
+PROTECTED
+──────────────────────────────────────
+*/
+
+function ProtectedRoute({
+  children,
+}) {
+  const {
+    isAuthenticated,
+    isLoading,
+  } = useAuthStore();
+
+  /*
+  LOADING
+  */
+
+  if (isLoading) {
+    return (
+      <FullScreenLoader />
+    );
+  }
+
+  /*
+  BLOCK
+  */
+
+  if (
+    !isAuthenticated
+  ) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  /*
+  OK
+  */
+
+  return children;
 }
+
+/*
+──────────────────────────────────────
+PUBLIC
+──────────────────────────────────────
+*/
+
+function PublicRoute({
+  children,
+}) {
+  const {
+    isAuthenticated,
+    isLoading,
+  } = useAuthStore();
+
+  /*
+  WAIT
+  */
+
+  if (isLoading) {
+    return (
+      <FullScreenLoader />
+    );
+  }
+
+  /*
+  REDIRECT
+  */
+
+  if (
+    isAuthenticated
+  ) {
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
+  }
+
+  /*
+  SHOW
+  */
+
+  return children;
+}
+
+/*
+──────────────────────────────────────
+APP
+──────────────────────────────────────
+*/
 
 export default function App() {
-  const initialize = useAuthStore(s => s.initialize);
-  useEffect(() => { initialize(); }, []);
+  /*
+  INIT
+  */
+
+  const initialize =
+    useAuthStore(
+      (s) => s.initialize
+    );
+
+  /*
+  LOAD AUTH
+  */
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  /*
+  UI
+  */
 
   return (
     <BrowserRouter>
+      {/* TOASTER */}
+
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
+
           style: {
-            background: '#fff',
-            color: '#27272a',
-            border: '1px solid #e4e4e7',
-            borderRadius: '12px',
-            fontSize: '13px',
-            boxShadow: '0 4px 12px rgb(0 0 0 / 0.1)',
+            background:
+              "#fff",
+
+            color:
+              "#27272a",
+
+            border:
+              "1px solid #e4e4e7",
+
+            borderRadius:
+              "14px",
+
+            fontSize:
+              "13px",
+
+            boxShadow:
+              "0 10px 30px rgb(0 0 0 / 0.08)",
           },
         }}
       />
+
+      {/* ROUTES */}
+
       <Routes>
-        <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-        <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* LOGIN */}
+
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+
+        {/* DASHBOARD */}
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* COMPANY PANEL */}
+
+        <Route
+          path="/admin/companies"
+          element={
+            <ProtectedRoute>
+              <CompanyManagementPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ROOT */}
+
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
+
+        {/* FALLBACK */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
+

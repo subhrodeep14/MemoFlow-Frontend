@@ -1,27 +1,151 @@
-// src/utils/dateHelpers.js
-import { format, isAfter, subYears, parseISO } from 'date-fns';
+import {
+  format,
+  isAfter,
+  subYears,
+} from "date-fns";
 
-export const formatDateKey = (date) => format(new Date(date), 'yyyy-MM-dd');
+/*
+─────────────────────────────────────────────
+SAFE DATE
+NO TIMEZONE SHIFT
+─────────────────────────────────────────────
+*/
 
-export const formatDisplay = (date) => format(new Date(date), 'MMMM d, yyyy');
+export const safeDate = (
+  value
+) => {
+  if (!value)
+    return new Date();
 
-export const formatDisplayShort = (date) => format(new Date(date), 'MMM d, yyyy');
+  /*
+  STRING:
+  2026-05-01
+  OR
+  2026-05-01T12:00:00
+  */
 
-export const isLocked = (date) => {
-  const entryDate = typeof date === 'string' ? parseISO(date) : new Date(date);
-  const oneYearAgo = subYears(new Date(), 1);
-  return isAfter(oneYearAgo, entryDate);
+  if (
+    typeof value ===
+    "string"
+  ) {
+    const pure =
+      value.split("T")[0];
+
+    const [
+      y,
+      m,
+      d,
+    ] = pure
+      .split("-")
+      .map(Number);
+
+    return new Date(
+      y,
+      m - 1,
+      d
+    );
+  }
+
+  return new Date(value);
 };
 
-export const formatFileSize = (bytes) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/*
+─────────────────────────────────────────────
+YYYY-MM-DD
+─────────────────────────────────────────────
+*/
+
+export const formatDateKey =
+  (date) => {
+    return format(
+      safeDate(date),
+      "yyyy-MM-dd"
+    );
+  };
+
+/*
+─────────────────────────────────────────────
+DISPLAY DATE ONLY
+─────────────────────────────────────────────
+*/
+
+export const formatDisplay =
+  (date) => {
+    return format(
+      safeDate(date),
+      "dd MMM yyyy"
+    );
+  };
+
+export const formatDisplayShort =
+  (date) => {
+    return format(
+      safeDate(date),
+      "dd MMM yyyy"
+    );
+  };
+
+/*
+─────────────────────────────────────────────
+LOCK
+─────────────────────────────────────────────
+*/
+
+export const isLocked = (
+  date
+) => {
+  const entryDate =
+    safeDate(date);
+
+  const oneYearAgo =
+    subYears(
+      new Date(),
+      1
+    );
+
+  return isAfter(
+    oneYearAgo,
+    entryDate
+  );
 };
 
-export const activityTypeConfig = {
-  general: { label: 'General', color: 'bg-gray-100 text-gray-700' },
-  meeting: { label: 'Meeting', color: 'bg-blue-100 text-blue-700' },
-  task: { label: 'Task', color: 'bg-green-100 text-green-700' },
-  note: { label: 'Note', color: 'bg-purple-100 text-purple-700' },
-};
+/*
+─────────────────────────────────────────────
+FILE SIZE
+─────────────────────────────────────────────
+*/
+
+export const formatFileSize =
+  (bytes) => {
+    if (bytes < 1024)
+      return `${bytes} B`;
+
+    if (
+      bytes <
+      1024 * 1024
+    ) {
+      return `${(
+        bytes / 1024
+      ).toFixed(1)} KB`;
+    }
+
+    return `${(
+      bytes /
+      (1024 * 1024)
+    ).toFixed(1)} MB`;
+  };
+
+
+  /*
+─────────────────────────────────────────────
+DATE TIME
+─────────────────────────────────────────────
+*/
+
+export const formatDateTime =
+  (date) => {
+    return format(
+      safeDate(date),
+      "dd MMM yyyy"
+    );
+  };

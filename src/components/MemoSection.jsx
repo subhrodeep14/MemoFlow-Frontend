@@ -1,9 +1,10 @@
 // src/components/MemoSection.jsx
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit3, Save, X, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, Edit3, Save, X, Lock, ChevronDown, ChevronUp, Upload, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { memoApi } from '../utils/api';
+import { memoApi, fileApi } from '../utils/api';
+import { formatFileSize } from '../utils/dateHelpers';
 
 export default function MemoSection({ date, locked, onChange }) {
   const [memos, setMemos] = useState([]);
@@ -11,7 +12,9 @@ export default function MemoSection({ date, locked, onChange }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [uploadingMemoIds, setUploadingMemoIds] = useState({});
   const [form, setForm] = useState({ title: '', description: '' });
+  const fileInputRefs = useRef({});
 
   const load = async () => {
     setIsLoading(true);
@@ -63,6 +66,54 @@ export default function MemoSection({ date, locked, onChange }) {
       onChange?.();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to delete');
+    }
+  };
+
+  const openFileDialog = (memoId) => {
+    fileInputRefs.current[memoId]?.click();
+  };
+
+  const handleFileUpload = async (memoId, files) => {
+    if (!files || files.length === 0) return;
+
+    setUploadingMemoIds((prev) => ({ ...prev, [memoId]: true }));
+    const uploaded = [];
+
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('date', date);
+        formData.append('memoId', memoId);
+
+        await fileApi.upload(formData);
+        uploaded.push(file.name);
+      }
+
+      if (uploaded.length > 0) {
+        toast.success(`Uploaded ${uploaded.length} file(s)`);
+        load();
+        onChange?.();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to upload file(s)');
+    } finally {
+      setUploadingMemoIds((prev) => ({ ...prev, [memoId]: false }));
+      if (fileInputRefs.current[memoId]) {
+        fileInputRefs.current[memoId].value = null;
+      }
+    }
+  };
+
+  const handleDeleteAttachment = async (id) => {
+    if (!confirm('Delete this attachment?')) return;
+    try {
+      await fileApi.delete(id);
+      toast.success('Attachment removed');
+      load();
+      onChange?.();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to delete attachment');
     }
   };
 
@@ -211,9 +262,78 @@ export default function MemoSection({ date, locked, onChange }) {
                         {memo.description || <span className="italic text-surface-400">No description</span>}
                       </p>
                     )}
-                    <p className="text-[10px] text-surface-300 mt-2">
-                      {memo.attachments?.length || 0} attachment(s) · Created {new Date(memo.createdAt).toLocaleString()}
-                    </p>
+
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-[10px] text-surface-300">
+                        {memo.attachments?.length || 0} attachment(s) · Created {new Date(memo.createdAt).toLocaleString()}
+                      </p>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => openFileDialog(memo.id)}
+                          disabled={locked || memo.isLocked || uploadingMemoIds[memo.id]}
+                          className={`btn-ghost text-xs px-3 py-2 ${uploadingMemoIds[memo.id] ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        >
+                          <Upload size={12} />
+                          <span className="ml-1">
+                            {uploadingMemoIds[memo.id] ? 'Uploading...' : 'Add files'}
+                          </span>
+                        </button>
+                        <input
+                          ref={(el) => {
+                            if (el) fileInputRefs.current[memo.id] = el;
+                          }}
+                          type="file"
+                          accept=".pdf"
+                          multiple
+                          hidden
+                          onChange={(e) => handleFileUpload(memo.id, e.target.files)}
+                        />
+                      </div>
+                    </div>
+
+                    {memo.attachments?.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        {memo.attachments.map((file) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col gap-2 rounded-2xl border border-surface-200 bg-surface-50 p-3 sm:flex-row sm:items-center sm:justify-between"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-surface-800 truncate">
+                                {file.originalName}
+                              </p>
+                              <p className="text-[11px] text-surface-400">
+                                {formatFileSize(file.size)} · {new Date(file.uploadedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => window.open(fileApi.getUrl(file.id), '_blank')}
+                                className="btn-ghost p-1.5"
+                                title="View attachment"
+                              >
+                                <Eye size={14} />
+                              </button>
+
+                              {!memo.isLocked && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteAttachment(file.id)}
+                                  className="btn-ghost p-1.5 text-red-400 hover:text-red-600"
+                                  title="Remove attachment"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

@@ -1,109 +1,272 @@
-// src/components/DayPanel.jsx
-// COMPLETE REPLACEMENT — includes the new "Entries" tab
-import { useState } from 'react';
-import { X, Lock, FileText, Activity, FolderOpen, ClipboardList } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { formatDisplay, isLocked } from '../utils/dateHelpers';
-import MemoSection from './MemoSection';
-import ActivitySection from './ActivitySection';
-import FileSection from './FileSection';
-import EntrySection from './EntrySection';
+import { useMemo } from "react";
 
-const TABS = [
-  { id: 'entries', label: 'Entries', icon: ClipboardList, accent: 'indigo' },
-  { id: 'memos', label: 'Memos', icon: FileText, accent: 'blue' },
-  { id: 'activities', label: 'Activities', icon: Activity, accent: 'emerald' },
-  { id: 'files', label: 'Files', icon: FolderOpen, accent: 'violet' },
-];
+import {
+  X,
+  Lock,
+  CalendarDays,
+  ShieldCheck,
+} from "lucide-react";
 
-const accentMap = {
-  indigo: 'bg-indigo-600 text-white',
-  blue: 'bg-blue-600 text-white',
-  emerald: 'bg-emerald-600 text-white',
-  violet: 'bg-violet-600 text-white',
-};
+import {
+  motion,
+} from "framer-motion";
 
-export default function DayPanel({ date, onClose, onChange }) {
-  const [activeTab, setActiveTab] = useState('entries');
-  const locked = isLocked(date);
+import {
+  formatDisplayShort,
+  isLocked,
+} from "../utils/dateHelpers";
+
+import EntrySection from "./EntrySection";
+
+export default function DayPanel({
+  date,
+  onClose,
+  onChange,
+}) {
+  /*
+  ─────────────────────────────────────
+  LOCKED
+  ─────────────────────────────────────
+  */
+
+  const locked = useMemo(
+    () => isLocked(date),
+    [date]
+  );
+
+  /*
+  ─────────────────────────────────────
+  UI
+  ─────────────────────────────────────
+  */
 
   return (
-    <div
-      className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    <motion.div
+      initial={{
+        opacity: 0,
+        x: 20,
+      }}
+      animate={{
+        opacity: 1,
+        x: 0,
+      }}
+      exit={{
+        opacity: 0,
+        x: 20,
+      }}
+      transition={{
+        duration: 0.2,
+      }}
+   className="
+  relative
+
+  flex
+  flex-col
+
+  h-full
+  min-h-[420px]
+  max-h-[78vh]
+
+  overflow-hidden
+
+  rounded-[24px]
+  md:rounded-[28px]
+
+  border
+  border-slate-200/70
+  dark:border-slate-800
+
+  bg-white/90
+  dark:bg-slate-950/80
+
+  backdrop-blur-xl
+
+  shadow-[0_10px_40px_rgba(0,0,0,0.08)]
+"
     >
-      {/* Header */}
-      <div className="px-4 pt-4 pb-0 border-b border-slate-100 flex-shrink-0">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900" style={{ fontFamily: "'Fraunces', serif", fontWeight: 300 }}>
-              {formatDisplay(date)}
-            </h2>
-            {locked && (
-              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-[11px] font-medium bg-amber-100 text-amber-800 rounded-full border border-amber-200">
-                <Lock size={10} />
-                Locked — read only
-              </span>
-            )}
+      {/* HEADER */}
+
+      <div
+        className="
+          px-4
+          pt-4
+          pb-3
+
+          border-b
+          border-slate-100
+          dark:border-slate-800
+
+          flex-shrink-0
+
+          bg-white/80
+          dark:bg-slate-950/60
+
+          backdrop-blur-xl
+        "
+      >
+        <div className="flex items-start justify-between gap-3">
+          {/* LEFT */}
+
+          <div className="flex items-start gap-3">
+            {/* ICON */}
+
+            <div
+              className="
+                w-11
+                h-11
+
+                rounded-2xl
+
+                bg-gradient-to-br
+                from-indigo-500
+                to-violet-600
+
+                flex
+                items-center
+                justify-center
+
+                shadow-lg
+                shadow-indigo-500/20
+              "
+            >
+              <CalendarDays
+                size={20}
+                className="text-white"
+              />
+            </div>
+
+            {/* TEXT */}
+
+            <div>
+              <h2
+                className="
+                  text-base
+md:text-lg
+
+                  font-bold
+                  tracking-tight
+
+                  text-slate-900
+                  dark:text-white
+                "
+              >
+                {formatDisplayShort(
+                  date
+                )}
+              </h2>
+
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
+                {locked ? (
+                  <span
+                    className="
+                      inline-flex
+                      items-center
+                      gap-1
+
+                      px-2.5
+                      py-1
+
+                      rounded-full
+
+                      text-[10px]
+                      font-semibold
+
+                      bg-amber-100
+                      dark:bg-amber-500/15
+
+                      text-amber-700
+                      dark:text-amber-300
+                    "
+                  >
+                    <Lock
+                      size={10}
+                    />
+
+                    Locked
+                  </span>
+                ) : (
+                  <span
+                    className="
+                      inline-flex
+                      items-center
+                      gap-1
+
+                      px-2.5
+                      py-1
+
+                      rounded-full
+
+                      text-[10px]
+                      font-semibold
+
+                      bg-emerald-100
+                      dark:bg-emerald-500/15
+
+                      text-emerald-700
+                      dark:text-emerald-300
+                    "
+                  >
+                    <ShieldCheck
+                      size={10}
+                    />
+
+                    Editable
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* CLOSE */}
+
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-slate-600 -mt-0.5 -mr-1"
+            className="
+              w-9
+              h-9
+
+              rounded-xl
+
+              flex
+              items-center
+              justify-center
+
+              text-slate-400
+              dark:text-slate-500
+
+              hover:text-red-500
+              dark:hover:text-red-400
+
+              hover:bg-red-50
+              dark:hover:bg-red-500/10
+
+              transition-all
+            "
           >
-            <X size={16} />
+            <X size={17} />
           </button>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex gap-0.5">
-          {TABS.map(({ id, label, icon: Icon, accent }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`relative flex items-center gap-1.5 px-3 py-2 rounded-t-xl text-xs font-medium transition-all ${
-                activeTab === id
-                  ? `${accentMap[accent]} shadow-sm`
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Icon size={12} />
-              {label}
-              {activeTab === id && (
-                <motion.div
-                  layoutId="tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/40 rounded-full"
-                />
-              )}
-            </button>
-          ))}
+      {/* CONTENT */}
+
+      <div
+        className="
+          flex-1
+
+          overflow-y-auto
+
+          bg-slate-50/80
+          dark:bg-slate-900/40
+        "
+      >
+        <div className="p-2.5 md:p-4">
+          <EntrySection
+            date={date}
+            onChange={onChange}
+          />
         </div>
       </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-          >
-            {activeTab === 'entries' && (
-              <EntrySection date={date} onChange={onChange} />
-            )}
-            {activeTab === 'memos' && (
-              <MemoSection date={date} locked={locked} onChange={onChange} />
-            )}
-            {activeTab === 'activities' && (
-              <ActivitySection date={date} locked={locked} onChange={onChange} />
-            )}
-            {activeTab === 'files' && (
-              <FileSection date={date} locked={locked} onChange={onChange} />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </div>
+    </motion.div>
   );
 }

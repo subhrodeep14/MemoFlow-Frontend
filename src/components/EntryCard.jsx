@@ -1,171 +1,627 @@
 // src/components/EntryCard.jsx
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import { useState } from "react";
+
 import {
-  ChevronDown, ChevronUp, ExternalLink, Hash, Building2, ArrowRight,
-  FileText, ImageIcon, Send, Calendar, Clock,
-} from 'lucide-react';
-import { format } from 'date-fns';
+  motion,
+  AnimatePresence,
+} from "framer-motion";
 
-function formatFileSize(bytes) {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
+import {
+  ChevronDown,
+  ChevronUp,
+  Building2,
+  ArrowRight,
+  FileText,
+  ImageIcon,
+  Clock,
+  Hash,
+  BadgeCheck,
+} from "lucide-react";
 
-const purposeColors = [
-  'bg-blue-100 text-blue-700',
-  'bg-violet-100 text-violet-700',
-  'bg-emerald-100 text-emerald-700',
-  'bg-amber-100 text-amber-700',
-  'bg-rose-100 text-rose-700',
-  'bg-cyan-100 text-cyan-700',
-];
+import {
+  formatDateTime,
+} from "../utils/dateHelpers";
 
-function hashColor(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
-  return purposeColors[Math.abs(h) % purposeColors.length];
-}
+import { entryApi } from "../utils/api";
 
-export default function EntryCard({ entry, index = 0 }) {
-  const [expanded, setExpanded] = useState(false);
+const purposeColors = {
+  FIN: "bg-blue-100 text-blue-700",
+  HR: "bg-emerald-100 text-emerald-700",
+  LEG: "bg-rose-100 text-rose-700",
+  ADM: "bg-violet-100 text-violet-700",
+};
 
-  const hasFile = Boolean(entry.fileUrl);
-  const isPDF = entry.fileMime === 'application/pdf';
-  const colorClass = hashColor(entry.purpose || '');
+export default function EntryCard({
+  entry,
+  index = 0,
+  onRefresh,
+}) {
+  const [expanded, setExpanded] =
+    useState(false);
 
+  const [uploading, setUploading] =
+    useState(false);
+
+  const hasFile =
+    Boolean(entry.fileUrl);
+
+  const isPDF =
+    entry.fileMime ===
+    "application/pdf";
+
+  const purposeColor =
+    purposeColors[
+    entry.purpose?.code
+    ] ||
+    "bg-slate-100 text-slate-700";
+
+  // ─────────────────────────────
+  // FILE UPLOAD
+  // ─────────────────────────────
+
+  const handleFileUpload =
+    async (e) => {
+      try {
+        const file =
+          e.target.files[0];
+
+        if (!file) return;
+
+        setUploading(true);
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "file",
+          file
+        );
+
+        await entryApi.uploadFile(
+          entry.id,
+          formData
+        );
+
+        onRefresh?.();
+      } catch (err) {
+        console.log(err);
+
+        alert(
+          "Upload failed"
+        );
+      } finally {
+        setUploading(false);
+      }
+    };
+  // ─────────────────────────────
+  // DELETE FILE
+  // ─────────────────────────────
+  const handleDeleteFile =
+    async () => {
+      try {
+        await entryApi.deleteFile(
+          entry.id
+        );
+
+        onRefresh?.();
+      } catch (err) {
+        console.log(err);
+
+        alert(
+          "Delete failed"
+        );
+      }
+    };
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.2 }}
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+      initial={{
+        opacity: 0,
+        y: 10,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        delay: index * 0.03,
+      }}
+      className="
+        bg-white
+        dark:bg-slate-900
+        rounded-3xl
+        border
+        border-slate-200
+        dark:border-slate-800
+        overflow-hidden
+        shadow-sm
+        hover:shadow-lg
+        transition-all
+      "
     >
-      {/* Card header — always visible */}
+      {/* HEADER */}
+
       <div
-        className="px-4 py-3 cursor-pointer select-none"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() =>
+          setExpanded((v) => !v)
+        }
+        className="
+          p-4
+          cursor-pointer
+        "
       >
-        {/* Top row: memo number + SL badge */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-              <Hash size={11} className="text-indigo-600" />
+        {/* TOP */}
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div
+              className="
+                w-11
+                h-11
+                rounded-2xl
+                bg-indigo-100
+                flex
+                items-center
+                justify-center
+                flex-shrink-0
+              "
+            >
+              <Hash
+                size={18}
+                className="text-indigo-600"
+              />
             </div>
-            <span className="font-mono text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg">
-              {entry.memoNumber}
-            </span>
+
+            <div className="min-w-0">
+              <p
+                className="
+                  text-[13px]
+                  font-bold
+                  font-mono
+                  text-indigo-700
+                  truncate
+                "
+              >
+                {entry.memoNumber}
+              </p>
+
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span
+                  className="
+                    text-[10px]
+                    px-2
+                    py-1
+                    rounded-full
+                    bg-slate-100
+                    text-slate-600
+                    font-semibold
+                  "
+                >
+                  SL #{entry.slNo}
+                </span>
+
+                <span
+                  className={`
+                    text-[10px]
+                    px-2
+                    py-1
+                    rounded-full
+                    font-semibold
+                    ${purposeColor}
+                  `}
+                >
+                  {entry.purpose?.code}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-medium">
-              SL #{entry.slNo}
-            </span>
+
+          <button
+            className="
+              w-8
+              h-8
+              rounded-xl
+              hover:bg-slate-100
+              flex
+              items-center
+              justify-center
+              transition-all
+            "
+          >
             {expanded ? (
-              <ChevronUp size={14} className="text-slate-400" />
+              <ChevronUp
+                size={16}
+                className="text-slate-500"
+              />
             ) : (
-              <ChevronDown size={14} className="text-slate-400" />
+              <ChevronDown
+                size={16}
+                className="text-slate-500"
+              />
             )}
-          </div>
+          </button>
         </div>
 
-        {/* Company flow */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <Building2 size={10} className="text-blue-600" />
+        {/* COMPANY FLOW */}
+
+        <div className="mt-4 flex items-center gap-2">
+          {/* FROM */}
+
+          <div
+            className="
+              flex-1
+              rounded-2xl
+              bg-blue-50
+              px-3
+              py-2
+              min-w-0
+            "
+          >
+            <div className="flex items-center gap-2">
+              <Building2
+                size={13}
+                className="text-blue-600"
+              />
+
+              <span
+                className="
+                  text-[10px]
+                  font-semibold
+                  text-blue-700
+                  uppercase
+                "
+              >
+                FROM
+              </span>
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-slate-700 truncate leading-tight">{entry.senderName}</p>
-              <p className="font-mono text-[10px] text-slate-400">{entry.senderCode}</p>
-            </div>
+
+            <p
+              className="
+                mt-1
+                text-xs
+                font-semibold
+                text-slate-800
+                truncate
+              "
+            >
+              {
+                entry
+                  .senderCompany
+                  ?.name
+              }
+            </p>
+
+            <p
+              className="
+                text-[10px]
+                font-mono
+                text-slate-500
+              "
+            >
+              {
+                entry
+                  .senderCompany
+                  ?.code
+              }
+            </p>
           </div>
 
-          <ArrowRight size={12} className="text-slate-300 flex-shrink-0 mx-0.5" />
+          <ArrowRight
+            size={16}
+            className="
+              text-slate-300
+              flex-shrink-0
+            "
+          />
 
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <Building2 size={10} className="text-emerald-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-slate-700 truncate leading-tight">{entry.receiverName}</p>
-              <p className="font-mono text-[10px] text-slate-400">{entry.receiverCode}</p>
-            </div>
-          </div>
-        </div>
+          {/* TO */}
 
-        {/* Purpose tag + send count */}
-        <div className="flex items-center gap-2 mt-2">
-          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${colorClass} truncate max-w-[160px]`}>
-            {entry.purpose}
-          </span>
-          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-            <Send size={10} className="text-slate-400" />
-            <span className="text-[10px] text-slate-500">×{entry.sendCount}</span>
+          <div
+            className="
+              flex-1
+              rounded-2xl
+              bg-emerald-50
+              px-3
+              py-2
+              min-w-0
+            "
+          >
+            <div className="flex items-center gap-2">
+              <Building2
+                size={13}
+                className="text-emerald-600"
+              />
+
+              <span
+                className="
+                  text-[10px]
+                  font-semibold
+                  text-emerald-700
+                  uppercase
+                "
+              >
+                TO
+              </span>
+            </div>
+
+            <p
+              className="
+                mt-1
+                text-xs
+                font-semibold
+                text-slate-800
+                truncate
+              "
+            >
+              {
+                entry
+                  .receiverCompany
+                  ?.name
+              }
+            </p>
+
+            <p
+              className="
+                text-[10px]
+                font-mono
+                text-slate-500
+              "
+            >
+              {
+                entry
+                  .receiverCompany
+                  ?.code
+              }
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Expanded content */}
+      {/* EXPANDED */}
+
       <AnimatePresence>
         {expanded && (
           <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: 'auto' }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            initial={{
+              height: 0,
+              opacity: 0,
+            }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+            }}
+            transition={{
+              duration: 0.22,
+            }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
-              {/* Description */}
+            <div
+              className="
+                border-t
+                border-slate-100
+                px-4
+                py-4
+                space-y-4
+              "
+            >
+              {/* PURPOSE */}
+
               <div>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</p>
-                <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">{entry.description}</p>
+                <p
+                  className="
+                    text-[10px]
+                    uppercase
+                    tracking-wider
+                    text-slate-400
+                    font-semibold
+                    mb-1
+                  "
+                >
+                  Purpose
+                </p>
+
+                <p className="text-sm text-slate-700">
+                  {
+                    entry
+                      .purpose
+                      ?.name
+                  }
+                </p>
               </div>
 
-              {/* Meta row */}
-              <div className="flex items-center gap-4 flex-wrap">
+              {/* DESCRIPTION */}
+
+              <div>
+                <p
+                  className="
+                    text-[10px]
+                    uppercase
+                    tracking-wider
+                    text-slate-400
+                    font-semibold
+                    mb-1
+                  "
+                >
+                  Description
+                </p>
+
+                <p
+                  className="
+                    text-sm
+                    text-slate-600
+                    whitespace-pre-wrap
+                    leading-relaxed
+                  "
+                >
+                  {entry.description}
+                </p>
+              </div>
+
+              {/* DATE */}
+
+              <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-1.5">
-                  <Calendar size={11} className="text-slate-400" />
-                  <span className="text-[11px] text-slate-500">
-                    {format(new Date(entry.date), 'dd MMM yyyy')}
+                  <Clock
+                    size={13}
+                    className="text-slate-400"
+                  />
+
+                  <span className="text-xs text-slate-500">
+                    {formatDateTime(
+                      entry.createdAt
+                    )}
                   </span>
                 </div>
+
                 <div className="flex items-center gap-1.5">
-                  <Clock size={11} className="text-slate-400" />
-                  <span className="text-[11px] text-slate-500">
-                    {format(new Date(entry.createdAt), 'hh:mm a')}
+                  <BadgeCheck
+                    size={13}
+                    className="text-emerald-500"
+                  />
+
+                  <span className="text-xs text-emerald-600 font-medium">
+                    Official Memo
                   </span>
                 </div>
               </div>
 
-              {/* File attachment */}
-              {hasFile && (
-                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isPDF ? 'bg-red-100' : 'bg-blue-100'}`}>
-                    {isPDF
-                      ? <FileText size={15} className="text-red-600" />
-                      : <ImageIcon size={15} className="text-blue-600" />}
+              {/* FILE SECTION */}
+
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                  p-3
+                  rounded-2xl
+                  bg-slate-50
+                  border
+                  border-slate-100
+                "
+              >
+                {/* ICON */}
+
+                <div
+                  className={`
+                    w-10
+                    h-10
+                    rounded-xl
+                    flex
+                    items-center
+                    justify-center
+                    ${isPDF
+                      ? "bg-red-100"
+                      : "bg-blue-100"
+                    }
+                  `}
+                >
+                  {isPDF ? (
+                    <FileText
+                      size={18}
+                      className="text-red-600"
+                    />
+                  ) : (
+                    <ImageIcon
+                      size={18}
+                      className="text-blue-600"
+                    />
+                  )}
+                </div>
+
+                {/* INFO */}
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">
+                    {entry.fileName ||
+                      "No File Uploaded"}
+                  </p>
+
+                  <p className="text-xs text-slate-400">
+                    {hasFile
+                      ? "Attached File"
+                      : "Upload optional"}
+                  </p>
+                </div>
+
+                {/* ACTIONS */}
+
+                {hasFile ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (!entry.fileUrl)
+                          return;
+
+        window.open(
+  url,
+  "_blank"
+);
+                      }}
+                      className="
+    px-3
+    py-2
+    rounded-xl
+    bg-indigo-50
+    text-indigo-600
+    text-xs
+    font-semibold
+    hover:bg-indigo-100
+    transition
+  "
+                    >
+                      View
+                    </button>
+
+                    <button
+                      onClick={
+                        handleDeleteFile
+                      }
+                      className="
+                        px-3
+                        py-2
+                        rounded-xl
+                        bg-red-50
+                        text-red-600
+                        text-xs
+                        font-semibold
+                        hover:bg-red-100
+                      "
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-700 truncate">
-                      {entry.fileName || 'Attachment'}
-                    </p>
-                    <p className="text-[10px] text-slate-400">{isPDF ? 'PDF Document' : 'Image'}</p>
-                  </div>
-                  <a
-                    href={entry.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                ) : (
+                  <label
+                    className="
+                      px-3
+                      py-2
+                      rounded-xl
+                      bg-emerald-50
+                      text-emerald-600
+                      text-xs
+                      font-semibold
+                      cursor-pointer
+                      hover:bg-emerald-100
+                    "
                   >
-                    <ExternalLink size={11} />
-                    Open
-                  </a>
-                </div>
-              )}
+                    {uploading
+                      ? "Uploading..."
+                      : "Upload"}
+
+                    <input
+                      type="file"
+                      hidden
+                      onChange={
+                        handleFileUpload
+                      }
+                    />
+                  </label>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

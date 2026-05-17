@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react';
 import { FileText, Activity, FolderOpen, ClipboardList } from 'lucide-react';
 import { calendarApi } from '../utils/api';
 
-export default function StatsBar() {
+export default function StatsBar({ refreshKey }) {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
     calendarApi.getStats()
       .then((r) => setStats(r.data.stats))
       .catch(() => {});
-  }, []);
+  }, [refreshKey]);
 
   const items = [
     {

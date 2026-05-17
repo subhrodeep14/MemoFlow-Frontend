@@ -1,83 +1,412 @@
-// src/components/EntrySection.jsx
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, RefreshCw } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { entryApi } from '../utils/api';
-import EntryCard from './EntryCard';
-import CreateEntryModal from './CreateEntryModal';
+import {
+  useState,
+  useEffect,
+} from "react";
 
-export default function EntrySection({ date, onChange }) {
-  const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+import {
+  motion,
+  AnimatePresence,
+} from "framer-motion";
+import {
+  safeDate,
+} from "../utils/dateHelpers";
+import {
+  Plus,
+  Loader,
+} from "lucide-react";
 
-  const load = async () => {
-    setIsLoading(true);
+import { format } from "date-fns";
+
+import toast from "react-hot-toast";
+
+import { entryApi } from "../utils/api";
+
+import EntryCard from "./EntryCard";
+
+import CreateEntryModal from "./CreateEntryModal";
+
+export default function EntrySection({
+  date,
+  refreshKey,
+  onChange,
+}) {
+  /*
+   ─────────────────────────────────────
+   STATE
+   ─────────────────────────────────────
+  */
+
+  const [entries, setEntries] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    showCreateModal,
+    setShowCreateModal,
+  ] = useState(false);
+
+  /*
+   ─────────────────────────────────────
+   LOAD ENTRIES
+   ─────────────────────────────────────
+  */
+
+  useEffect(() => {
+    loadEntries();
+  }, [date, refreshKey]);
+
+  const loadEntries = async () => {
     try {
-      const res = await entryApi.getByDate(date);
-      setEntries(res.data.entries || []);
-    } catch {
-      toast.error('Failed to load entries');
+      setLoading(true);
+
+      /*
+       FIX TIMEZONE ISSUE
+      */
+
+  /*
+ DATE ALREADY STRING
+ DO NOT REFORMAT AGAIN
+*/
+
+const dateStr =
+  typeof date === "string"
+    ? date
+    : format(
+        date,
+        "yyyy-MM-dd"
+      );
+      /*
+       FETCH
+      */
+
+      const res =
+        await entryApi.getByDate(
+          dateStr
+        );
+
+      setEntries(
+        res.data.entries || []
+      );
+    } catch (err) {
+      console.error(err);
+
+      toast.error(
+        "Failed to load entries"
+      );
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, [date]);
+  /*
+   ─────────────────────────────────────
+   DELETE
+   ─────────────────────────────────────
+  */
 
-  const handleSuccess = (newEntry) => {
-    setEntries((prev) => [newEntry, ...prev]);
-    onChange?.();
+  const handleDelete =
+    async (id) => {
+      const confirmDelete =
+        window.confirm(
+          "Are you sure you want to delete this entry?"
+        );
+
+      if (!confirmDelete)
+        return;
+
+      try {
+        await entryApi.delete(
+          id
+        );
+
+        toast.success(
+          "Entry deleted"
+        );
+
+        /*
+         REFRESH
+        */
+
+        await loadEntries();
+
+        onChange?.();
+      } catch (err) {
+        console.error(err);
+
+        toast.error(
+          "Failed to delete entry"
+        );
+      }
+    };
+
+  /*
+   ─────────────────────────────────────
+   DOWNLOAD
+   ─────────────────────────────────────
+  */
+
+  const handleDownload = (
+    entry
+  ) => {
+    if (!entry.fileUrl)
+      return;
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+    link.href =
+      entry.fileUrl;
+
+    link.download =
+      entry.fileName ||
+      "document";
+
+    link.target =
+      "_blank";
+
+    link.click();
   };
 
-  if (isLoading) {
+  /*
+   ─────────────────────────────────────
+   LOADING
+   ─────────────────────────────────────
+  */
+
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-2">
-        <RefreshCw size={18} className="text-slate-300 animate-spin" />
-        <p className="text-xs text-slate-400">Loading entries…</p>
+      <div
+        className="
+          flex
+          items-center
+          justify-center
+
+          py-16
+        "
+      >
+        <div
+          className="
+            flex
+            items-center
+            gap-3
+          "
+        >
+          <Loader
+            className="
+              w-5
+              h-5
+
+              animate-spin
+
+              text-indigo-600
+            "
+          />
+
+          <span
+            className="
+              text-sm
+              text-slate-500
+              dark:text-slate-400
+            "
+          >
+            Loading entries...
+          </span>
+        </div>
       </div>
     );
   }
 
+  /*
+   ─────────────────────────────────────
+   UI
+   ─────────────────────────────────────
+  */
+
   return (
-    <div className="space-y-3">
-      {/* Add button */}
-      <button
-        onClick={() => setShowModal(true)}
-        className="w-full flex items-center gap-2 px-3 py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-indigo-400 hover:text-indigo-600 transition-all duration-200 hover:bg-indigo-50/30"
-      >
-        <Plus size={14} />
-        Create new entry
-      </button>
+    <div className="space-y-4">
+      {/* HEADER */}
 
-      {/* Entry list */}
-      {entries.length === 0 ? (
-        <div className="text-center py-10">
-          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <Plus size={20} className="text-slate-400" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h3
+            className="
+              text-lg
+              font-bold
+
+              text-slate-900
+              dark:text-white
+            "
+          >
+            Entries
+          </h3>
+
+          <p
+            className="
+              text-sm
+
+              text-slate-500
+              dark:text-slate-400
+            "
+          >
+            {
+              entries.length
+            }{" "}
+            total
+          </p>
+        </div>
+
+        {/* CREATE */}
+
+        <button
+          onClick={() =>
+            setShowCreateModal(
+              true
+            )
+          }
+          className="
+            flex
+            items-center
+            gap-2
+
+            px-4
+            py-2.5
+
+            rounded-xl
+
+            bg-indigo-600
+            hover:bg-indigo-700
+
+            text-white
+
+            text-sm
+            font-semibold
+
+            transition-all
+          "
+        >
+          <Plus className="w-4 h-4" />
+
+          New Entry
+        </button>
+      </div>
+
+      {/* LIST */}
+
+      <AnimatePresence mode="popLayout">
+        {entries.length >
+        0 ? (
+          <div className="space-y-3">
+            {entries.map(
+              (
+                entry
+              ) => (
+                <EntryCard
+                  key={
+                    entry.id
+                  }
+                  entry={entry}
+                  onDelete={
+                    handleDelete
+                  }
+                  onDownload={
+                    handleDownload
+                  }
+                  onRefresh={async () => {
+                    await loadEntries();
+
+                    onChange?.();
+                  }}
+                />
+              )
+            )}
           </div>
-          <p className="text-sm text-slate-500 font-medium">No entries yet</p>
-          <p className="text-xs text-slate-400 mt-1">Click the button above to create one</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {entries.map((entry, i) => (
-            <EntryCard key={entry.id} entry={entry} index={i} />
-          ))}
-        </div>
-      )}
+        ) : (
+          <motion.div
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            className="
+              rounded-3xl
 
-      {/* Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <CreateEntryModal
-            date={date}
-            onClose={() => setShowModal(false)}
-            onSuccess={handleSuccess}
-          />
+              border
+              border-dashed
+              border-slate-300
+              dark:border-slate-700
+
+              bg-white
+              dark:bg-slate-900
+
+              py-16
+
+              text-center
+            "
+          >
+            <p
+              className="
+                text-slate-500
+                dark:text-slate-400
+
+                font-medium
+              "
+            >
+              No entries found
+            </p>
+
+            <button
+              onClick={() =>
+                setShowCreateModal(
+                  true
+                )
+              }
+              className="
+                mt-4
+
+                text-sm
+                font-semibold
+
+                text-indigo-600
+                dark:text-indigo-400
+
+                hover:underline
+              "
+            >
+              Create first entry
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MODAL */}
+
+      <AnimatePresence>
+  {showCreateModal && (
+    <CreateEntryModal
+      open={showCreateModal}
+      selectedDate={date}
+      onClose={() =>
+        setShowCreateModal(false)
+      }
+      onSuccess={async () => {
+        setShowCreateModal(false);
+
+        await loadEntries();
+
+        onChange?.();
+
+        toast.success(
+          "Memo created successfully"
+        );
+      }}
+    />
+  )}
+</AnimatePresence>
     </div>
   );
 }
