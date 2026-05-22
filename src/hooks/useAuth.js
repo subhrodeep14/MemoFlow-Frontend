@@ -119,6 +119,83 @@ const useAuthStore = create(
     },
 
     /*
+REGISTER
+*/
+
+register: async ({
+  email,
+  password,
+  name,
+  accessCode,
+}) => {
+
+  /*
+  API
+  */
+
+  const res =
+    await authApi.register({
+      email,
+      password,
+      name,
+      accessCode,
+    });
+
+  const {
+    token,
+    user,
+  } = res.data;
+
+  /*
+  TOKEN
+  */
+
+  if (token) {
+    localStorage.setItem(
+      "token",
+      token
+    );
+  }
+
+  /*
+  DEFAULT COMPANY
+  */
+
+  let activeCompany =
+    null;
+
+  if (
+    user?.company
+  ) {
+    activeCompany = {
+      id: user.company.id,
+
+      name:
+        user.company.name,
+
+      code:
+        user.company.code,
+    };
+  }
+
+  /*
+  SET
+  */
+
+  set({
+    user,
+
+    activeCompany,
+
+    isAuthenticated: true,
+
+    isLoading: false,
+  });
+
+  return res.data;
+},
+
+    /*
     LOGIN
     */
 

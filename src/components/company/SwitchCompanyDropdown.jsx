@@ -10,9 +10,13 @@ import {
   Check,
   Building2,
 } from "lucide-react";
-
+import {
+  ArrowLeft,
+} from "lucide-react";
 import toast from "react-hot-toast";
-
+import {
+  useNavigate,
+} from "react-router-dom";
 import {
   companyApi,
 } from "../../utils/api";
@@ -23,7 +27,8 @@ export default function SwitchCompanyDropdown() {
   /*
   AUTH STORE
   */
-
+  const navigate =
+  useNavigate();
   const user =
     useAuthStore(
       (s) => s.user
@@ -192,6 +197,7 @@ export default function SwitchCompanyDropdown() {
     >
       {/* BUTTON */}
 
+
       <button
         onClick={() =>
           setOpen(!open)
@@ -220,6 +226,7 @@ export default function SwitchCompanyDropdown() {
           transition-all
         "
       >
+        
         <div
           className="
             w-8
@@ -316,6 +323,39 @@ export default function SwitchCompanyDropdown() {
             overflow-y-auto
           "
         >
+          <button
+  onClick={() => {
+    navigate("/dashboard");
+
+    setOpen(false);
+  }}
+  className="
+    w-full
+
+    flex
+    items-center
+    gap-2
+
+    px-4
+    py-3
+
+    rounded-2xl
+
+    hover:bg-slate-100
+    dark:hover:bg-slate-900
+
+    text-sm
+    font-semibold
+
+    mb-2
+  "
+>
+  <ArrowLeft size={16} />
+
+  Back To Dashboard
+</button>
+     
+
           {companies.map(
             (company) => {
               const active =

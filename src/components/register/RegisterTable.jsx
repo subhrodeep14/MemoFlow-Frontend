@@ -15,16 +15,24 @@ import {
 import * as XLSX from "xlsx";
 
 import toast from "react-hot-toast";
-
+import useAuthStore from "../../hooks/useAuth";
 import {
   entryApi,
 } from "../../utils/api";
+
 
 export default function RegisterTable({
   rows = [],
   lastUsed = 0,
   refreshData,
 }) {
+
+
+  const user =
+  useAuthStore(
+    (state) => state.user
+  );
+
   /*
   ─────────────────────────────────────
   EXPORT
@@ -96,16 +104,17 @@ export default function RegisterTable({
   VIEW FILE
   ─────────────────────────────────────
   */
+const handleViewFile =
+  (url) => {
 
-  const handleViewFile =
-    (url) => {
-      if (!url) return;
+    if (!url) return;
 
-      window.open(
-        url,
-        "_blank"
-      );
-    };
+    window.open(
+      url,
+      "_blank",
+    //  "noopener,noreferrer"
+    );
+  };
 
   /*
   ─────────────────────────────────────
@@ -140,43 +149,58 @@ export default function RegisterTable({
   ─────────────────────────────────────
   */
 
-  const handleUpload =
-    async (
-      e,
-      entryId
-    ) => {
-      try {
-        const file =
-          e.target.files[0];
+const handleUpload =
+  async (
+    e,
+    entryId
+  ) => {
+    try {
 
-        if (!file) return;
+      const file =
+        e.target.files[0];
 
-        const formData =
-          new FormData();
+      if (!file) return;
 
-        formData.append(
-          "file",
-          file
-        );
+      /*
+      IMPORTANT
+      */
 
-        await entryApi.uploadFile(
-          entryId,
-          formData
-        );
+      e.target.value = null;
 
-        toast.success(
-          "File uploaded"
-        );
+      const formData =
+        new FormData();
 
-        refreshData?.();
-      } catch (err) {
-        console.log(err);
+      formData.append(
+        "file",
+        file
+      );
 
-        toast.error(
+      await entryApi.uploadFile(
+        entryId,
+        formData
+      );
+
+      /*
+      REFRESH FIRST
+      */
+
+      await refreshData?.();
+
+      toast.success(
+        "File uploaded"
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      toast.error(
+        err?.response?.data
+          ?.error ||
           "Upload failed"
-        );
-      }
-    };
+      );
+    }
+  };
 
   return (
     <motion.div
@@ -478,7 +502,7 @@ export default function RegisterTable({
                       {
                         row
                           ?.entry
-                          ?.sender
+                          ?.senderCompany
                           ?.name ||
                           "—"
                       }
@@ -534,7 +558,7 @@ export default function RegisterTable({
                       {
                         row
                           ?.entry
-                          ?.receiver
+                          ?.receiverCompany
                           ?.name ||
                           "—"
                       }
@@ -645,13 +669,14 @@ export default function RegisterTable({
                         View
                       </button>
 
-                      <button
-                        onClick={() =>
-                          handleDeleteFile(
-                            row
-                              ?.entry
-                              ?.id
-                          )
+                      {user?.role ===
+  "SUPER_ADMIN" && (<button
+                       onClick={() =>
+    handleDeleteFile(
+      row
+        ?.entry
+        ?.id
+    )
                         }
                         className="
                           h-10
@@ -677,51 +702,73 @@ export default function RegisterTable({
 
                         Delete
                       </button>
+                      )}
                     </>
-                  ) : (
-                    <label
-                      className="
-                        h-10
-                        px-4
+                  )  : row?.entry ? (
 
-                        rounded-xl
+  <label
+    className="
+      h-10
+      px-4
 
-                        bg-indigo-600
+      rounded-xl
 
-                        text-white
+      bg-indigo-600
 
-                        text-xs
-                        font-semibold
+      text-white
 
-                        flex
-                        items-center
-                        gap-2
+      text-xs
+      font-semibold
 
-                        cursor-pointer
-                      "
-                    >
-                      <Upload
-                        size={14}
-                      />
+      flex
+      items-center
+      gap-2
 
-                      Upload
+      cursor-pointer
+    "
+  >
+    <Upload size={14} />
 
-                      <input
-                        type="file"
-                        hidden
-                        onChange={(
-                          e
-                        ) =>
-                          handleUpload(
-                            e,
-                            row
-                              ?.entry
-                              ?.id
-                          )
-                        }
-                      />
-                    </label>
-                  )}
+    Upload
+
+    <input
+      type="file"
+      hidden
+      onChange={(e) =>
+        handleUpload(
+          e,
+          row?.entry?.id
+        )
+      }
+    />
+  </label>
+
+) : (
+
+  <button
+    disabled
+    className="
+      h-10
+      px-4
+
+      rounded-xl
+
+      bg-slate-200
+      dark:bg-slate-800
+
+      text-slate-400
+
+      text-xs
+      font-semibold
+
+      cursor-not-allowed
+    "
+  >
+    No Entry
+  </button>
+
+)
+}
                 </div>
               </div>
             )
@@ -889,7 +936,7 @@ export default function RegisterTable({
                         {
                           row
                             ?.entry
-                            ?.sender
+                            ?.senderCompany
                             ?.name ||
                             "-"
                         }
@@ -905,7 +952,7 @@ export default function RegisterTable({
                         {
                           row
                             ?.entry
-                            ?.sender
+                            ?.senderCompany
                             ?.code ||
                             "-"
                         }
@@ -929,7 +976,7 @@ export default function RegisterTable({
                         {
                           row
                             ?.entry
-                            ?.receiver
+                            ?.receiverCompany
                             ?.name ||
                             "-"
                         }
@@ -945,7 +992,7 @@ export default function RegisterTable({
                         {
                           row
                             ?.entry
-                            ?.receiver
+                            ?.receiverCompany
                             ?.code ||
                             "-"
                         }
@@ -986,13 +1033,15 @@ export default function RegisterTable({
                   {/* FILE */}
 
                   <td className="px-6 py-5">
-                    {row.fileUrl ? (
+                    {row?.entry?.fileUrl ? (
                       <div className="flex gap-2">
                         <button
                           onClick={() =>
                             handleViewFile(
-                              row.fileUrl
-                            )
+  row
+    ?.entry
+    ?.fileUrl
+)
                           }
                           className="
                             h-10
@@ -1019,11 +1068,14 @@ export default function RegisterTable({
                           View
                         </button>
 
-                        <button
+                      {user?.role ===
+  "SUPER_ADMIN" && (  <button
                           onClick={() =>
-                            handleDeleteFile(
-                              row.id
-                            )
+                           handleDeleteFile(
+  row
+    ?.entry
+    ?.id
+)
                           }
                           className="
                             h-10
@@ -1048,52 +1100,72 @@ export default function RegisterTable({
                           />
 
                           Delete
-                        </button>
+                        </button>)}
                       </div>
-                    ) : (
-                      <label
-                        className="
-                          h-10
-                          px-4
+                    ) :  row?.entry ? (
 
-                          rounded-xl
+  <label
+    className="
+      h-10
+      px-4
 
-                          bg-indigo-600
+      rounded-xl
 
-                          text-white
+      bg-indigo-600
 
-                          text-xs
-                          font-semibold
+      text-white
 
-                          flex
-                          items-center
-                          gap-2
+      text-xs
+      font-semibold
 
-                          cursor-pointer
+      flex
+      items-center
+      gap-2
 
-                          w-fit
-                        "
-                      >
-                        <Upload
-                          size={14}
-                        />
+      cursor-pointer
+    "
+  >
+    <Upload size={14} />
 
-                        Upload
+    Upload
 
-                        <input
-                          type="file"
-                          hidden
-                          onChange={(
-                            e
-                          ) =>
-                            handleUpload(
-                              e,
-                              row.id
-                            )
-                          }
-                        />
-                      </label>
-                    )}
+    <input
+      type="file"
+      hidden
+      onChange={(e) =>
+        handleUpload(
+          e,
+          row?.entry?.id
+        )
+      }
+    />
+  </label>
+
+) : (
+
+  <button
+    disabled
+    className="
+      h-10
+      px-4
+
+      rounded-xl
+
+      bg-slate-200
+      dark:bg-slate-800
+
+      text-slate-400
+
+      text-xs
+      font-semibold
+
+      cursor-not-allowed
+    "
+  >
+    No Entry
+  </button>
+
+)}
                   </td>
                 </tr>
               )

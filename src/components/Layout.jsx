@@ -300,7 +300,7 @@ export default function Layout({
                       dark:text-white
                     "
                   >
-                    Secure CalDoc
+                    MEMO FLOW 
                   </h1>
 
                   <p
@@ -329,7 +329,7 @@ export default function Layout({
                 mx-10
               "
             >
-              <button
+              {/* <button
                 onClick={onSearch}
                 className="
                   w-full
@@ -366,7 +366,7 @@ export default function Layout({
                 >
                   Search memo...
                 </span>
-              </button>
+              </button> */}
             </div>
 
             {/* RIGHT */}
@@ -374,7 +374,7 @@ export default function Layout({
             <div className="flex items-center gap-3">
               {/* NOTIFICATION */}
 
-              <button
+              {/* <button
                 className="
                   relative
 
@@ -413,7 +413,7 @@ export default function Layout({
                     bg-red-500
                   "
                 />
-              </button>
+              </button> */}
 
               {/* DARK MODE */}
 
@@ -508,14 +508,14 @@ export default function Layout({
                       "Admin"}
                   </p>
 
-                  <p
+                  {/* <p
                     className="
                       text-xs
                       text-slate-400
                     "
                   >
                     Super Admin
-                  </p>
+                  </p> */}
                 </div>
               </div>
 
@@ -552,7 +552,7 @@ export default function Layout({
 
         {/* MOBILE SEARCH */}
 
-        {mobileMenu && (
+        {/* {mobileMenu && (
           <div className="lg:hidden px-4 pt-4">
             <button
               onClick={onSearch}
@@ -593,7 +593,7 @@ export default function Layout({
               </span>
             </button>
           </div>
-        )}
+        )} */}
 
         {/* CONTENT */}
 

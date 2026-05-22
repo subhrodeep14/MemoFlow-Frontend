@@ -10,6 +10,9 @@ import {
   EyeOff,
   Shield,
   KeyRound,
+  Mail,
+  User2,
+  Sparkles,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
@@ -88,10 +91,6 @@ export default function LoginPage() {
     async (e) => {
       e.preventDefault();
 
-      /*
-      VALIDATION
-      */
-
       if (
         !email ||
         !password
@@ -111,17 +110,9 @@ export default function LoginPage() {
         return;
       }
 
-      /*
-      LOADING
-      */
-
       setIsLoading(true);
 
       try {
-        /*
-        REGISTER
-        */
-
         if (
           isRegister
         ) {
@@ -140,10 +131,6 @@ export default function LoginPage() {
             "Account created successfully"
           );
 
-          /*
-          REDIRECT
-          */
-
           if (
             data.user
               .role ===
@@ -158,10 +145,6 @@ export default function LoginPage() {
             );
           }
         } else {
-          /*
-          LOGIN
-          */
-
           const data =
             await login(
               email,
@@ -171,10 +154,6 @@ export default function LoginPage() {
           toast.success(
             "Welcome back"
           );
-
-          /*
-          ROLE REDIRECT
-          */
 
           if (
             data.user
@@ -204,18 +183,23 @@ export default function LoginPage() {
   return (
     <div
       className="
+        relative
+
         min-h-screen
 
-        bg-surface-50
+        overflow-hidden
+
+        bg-[#020617]
 
         flex
         items-center
         justify-center
 
-        p-4
+        px-4
+        py-10
       "
     >
-      {/* BG */}
+      {/* BACKGROUND */}
 
       <div
         className="
@@ -223,202 +207,380 @@ export default function LoginPage() {
           inset-0
 
           overflow-hidden
-
-          pointer-events-none
         "
       >
         <div
           className="
             absolute
-            top-0
-            left-1/4
+            top-[-120px]
+            left-[-100px]
 
-            w-96
-            h-96
-
-            bg-accent-100
+            h-[420px]
+            w-[420px]
 
             rounded-full
 
-            blur-3xl
+            bg-violet-600/30
 
-            opacity-30
+            blur-3xl
           "
         />
 
         <div
           className="
             absolute
-            bottom-0
-            right-1/4
+            bottom-[-140px]
+            right-[-100px]
 
-            w-80
-            h-80
-
-            bg-blue-50
+            h-[420px]
+            w-[420px]
 
             rounded-full
 
-            blur-3xl
+            bg-cyan-500/20
 
-            opacity-40
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            inset-0
+
+            bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_40%)]
+
+            pointer-events-none
           "
         />
       </div>
 
+      {/* CARD */}
+
       <motion.div
         initial={{
           opacity: 0,
-          y: 20,
+          y: 30,
         }}
         animate={{
           opacity: 1,
           y: 0,
         }}
         transition={{
-          duration: 0.4,
-          ease: "easeOut",
+          duration: 0.5,
         }}
         className="
           relative
 
           w-full
           max-w-md
+
+          rounded-[32px]
+
+          border
+          border-white/10
+
+          bg-white/5
+
+          backdrop-blur-2xl
+
+          shadow-[0_10px_60px_rgba(0,0,0,0.6)]
+
+          overflow-hidden
         "
       >
-        {/* HEADER */}
+        {/* TOP GLOW */}
 
-        <div className="text-center mb-8">
-          <div
-            className="
-              inline-flex
-              items-center
-              justify-center
+        <div
+          className="
+            absolute
+            inset-x-0
+            top-0
 
-              w-14
-              h-14
+            h-1
 
-              bg-accent-600
+            bg-gradient-to-r
+            from-violet-500
+            via-indigo-500
+            to-cyan-400
+          "
+        />
 
-              rounded-2xl
+        <div className="p-8 md:p-10">
+          {/* HEADER */}
 
-              mb-4
+          <div className="text-center">
+            <div
+              className="
+                mx-auto
 
-              shadow-lg
-            "
-          >
-            <Shield
-              size={24}
-              className="text-white"
-            />
+                flex
+                items-center
+                justify-center
+
+                h-16
+                w-16
+
+                rounded-3xl
+
+                bg-gradient-to-br
+                from-violet-600
+                to-indigo-600
+
+                shadow-lg
+                shadow-violet-900/40
+              "
+            >
+              <Shield
+                size={30}
+                className="text-white"
+              />
+            </div>
+
+            <div className="mt-5">
+              <h1
+                className="
+                  text-4xl
+                  font-black
+
+                  tracking-tight
+
+                  text-white
+                "
+              >
+                MemoFlow
+              </h1>
+
+              <p
+                className="
+                  mt-2
+
+                  text-sm
+
+                  text-slate-400
+                "
+              >
+                Secure enterprise
+                dispatch &
+                workflow platform
+              </p>
+            </div>
+
+            <div
+              className="
+                mt-5
+
+                inline-flex
+                items-center
+                gap-2
+
+                rounded-full
+
+                border
+                border-violet-500/20
+
+                bg-violet-500/10
+
+                px-4
+                py-1.5
+
+                text-xs
+                font-semibold
+
+                text-violet-300
+              "
+            >
+              <Sparkles
+                size={13}
+              />
+
+              {isRegister
+                ? "Create your secure account"
+                : "Sign in to continue"}
+            </div>
           </div>
 
-          <h1
-            className="
-              font-display
-              text-3xl
+          {/* FORM */}
 
-              text-surface-900
-
-              font-light
-
-              mb-1
-            "
-          >
-            MemoFlow
-          </h1>
-
-          <p
-            className="
-              text-sm
-              text-surface-400
-            "
-          >
-            {isRegister
-              ? "Create company linked account"
-              : "Secure business document workflow"}
-          </p>
-        </div>
-
-        {/* CARD */}
-
-        <div className="card p-8">
           <form
             onSubmit={
               handleSubmit
             }
-            className="space-y-5"
+            className="mt-8 space-y-5"
           >
             {/* NAME */}
 
             {isRegister && (
               <div>
-                <label className="label">
+                <label
+                  className="
+                    mb-2
+                    block
+
+                    text-sm
+                    font-medium
+
+                    text-slate-300
+                  "
+                >
                   Full Name
                 </label>
 
-                <input
-                  type="text"
-                  value={
-                    fullName
-                  }
-                  onChange={(
-                    e
-                  ) =>
-                    setFullName(
-                      e.target
-                        .value
-                    )
-                  }
-                  className="input"
-                  placeholder="John Doe"
-                />
+                <div className="relative">
+                  <User2
+                    size={17}
+                    className="
+                      absolute
+                      left-4
+                      top-1/2
+                      -translate-y-1/2
+
+                      text-slate-500
+                    "
+                  />
+
+                  <input
+                    type="text"
+                    value={
+                      fullName
+                    }
+                    onChange={(
+                      e
+                    ) =>
+                      setFullName(
+                        e.target
+                          .value
+                      )
+                    }
+                    placeholder="John Doe"
+                    className="
+                      h-12
+                      w-full
+
+                      rounded-2xl
+
+                      border
+                      border-white/10
+
+                      bg-white/5
+
+                      pl-11
+                      pr-4
+
+                      text-white
+
+                      outline-none
+
+                      placeholder:text-slate-500
+
+                      focus:border-violet-500
+                      focus:ring-2
+                      focus:ring-violet-500/20
+                    "
+                  />
+                </div>
               </div>
             )}
 
             {/* EMAIL */}
 
             <div>
-              <label className="label">
-                Email address
+              <label
+                className="
+                  mb-2
+                  block
+
+                  text-sm
+                  font-medium
+
+                  text-slate-300
+                "
+              >
+                Email Address
               </label>
 
-              <input
-                type="email"
-                value={email}
-                onChange={(
-                  e
-                ) =>
-                  setEmail(
-                    e.target
-                      .value
-                  )
-                }
-                className="input"
-                placeholder="admin@example.com"
-                autoComplete="email"
-                required
-              />
+              <div className="relative">
+                <Mail
+                  size={17}
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+
+                    text-slate-500
+                  "
+                />
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(
+                    e
+                  ) =>
+                    setEmail(
+                      e.target
+                        .value
+                    )
+                  }
+                  placeholder="admin@memoflow.com"
+                  className="
+                    h-12
+                    w-full
+
+                    rounded-2xl
+
+                    border
+                    border-white/10
+
+                    bg-white/5
+
+                    pl-11
+                    pr-4
+
+                    text-white
+
+                    outline-none
+
+                    placeholder:text-slate-500
+
+                    focus:border-violet-500
+                    focus:ring-2
+                    focus:ring-violet-500/20
+                  "
+                  required
+                />
+              </div>
             </div>
 
             {/* ACCESS CODE */}
 
             {isRegister && (
               <div>
-                <label className="label">
-                  Company Verification Code
+                <label
+                  className="
+                    mb-2
+                    block
+
+                    text-sm
+                    font-medium
+
+                    text-slate-300
+                  "
+                >
+                  Company Access Code
                 </label>
 
                 <div className="relative">
                   <KeyRound
-                    size={16}
+                    size={17}
                     className="
                       absolute
-                      left-3
+                      left-4
                       top-1/2
                       -translate-y-1/2
 
-                      text-surface-400
+                      text-slate-500
                     "
                   />
 
@@ -434,34 +596,69 @@ export default function LoginPage() {
                         e.target.value.toUpperCase()
                       )
                     }
+                    placeholder="DHPE-ACCESS"
                     className="
-                      input
-                      pl-10
+                      h-12
+                      w-full
+
+                      rounded-2xl
+
+                      border
+                      border-white/10
+
+                      bg-white/5
+
+                      pl-11
+                      pr-4
+
+                      uppercase
+                      tracking-wider
+
+                      text-white
+
+                      outline-none
+
+                      placeholder:text-slate-500
+
+                      focus:border-violet-500
+                      focus:ring-2
+                      focus:ring-violet-500/20
                     "
-                    placeholder="AB12CD"
                   />
                 </div>
-
-                <p
-                  className="
-                    text-xs
-                    text-surface-400
-                    mt-2
-                  "
-                >
-                  Ask your administrator for the company verification code
-                </p>
               </div>
             )}
 
             {/* PASSWORD */}
 
             <div>
-              <label className="label">
+              <label
+                className="
+                  mb-2
+                  block
+
+                  text-sm
+                  font-medium
+
+                  text-slate-300
+                "
+              >
                 Password
               </label>
 
               <div className="relative">
+                <Lock
+                  size={17}
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+
+                    text-slate-500
+                  "
+                />
+
                 <input
                   type={
                     showPassword
@@ -479,11 +676,31 @@ export default function LoginPage() {
                         .value
                     )
                   }
-                  className="
-                    input
-                    pr-10
-                  "
                   placeholder="••••••••"
+                  className="
+                    h-12
+                    w-full
+
+                    rounded-2xl
+
+                    border
+                    border-white/10
+
+                    bg-white/5
+
+                    pl-11
+                    pr-12
+
+                    text-white
+
+                    outline-none
+
+                    placeholder:text-slate-500
+
+                    focus:border-violet-500
+                    focus:ring-2
+                    focus:ring-violet-500/20
+                  "
                   required
                 />
 
@@ -498,31 +715,41 @@ export default function LoginPage() {
                   }
                   className="
                     absolute
-                    right-3
+                    right-4
                     top-1/2
                     -translate-y-1/2
 
-                    text-surface-400
+                    text-slate-400
                   "
                 >
                   {showPassword ? (
                     <EyeOff
-                      size={16}
+                      size={18}
                     />
                   ) : (
                     <Eye
-                      size={16}
+                      size={18}
                     />
                   )}
                 </button>
               </div>
             </div>
 
-            {/* CONFIRM */}
+            {/* CONFIRM PASSWORD */}
 
             {isRegister && (
               <div>
-                <label className="label">
+                <label
+                  className="
+                    mb-2
+                    block
+
+                    text-sm
+                    font-medium
+
+                    text-slate-300
+                  "
+                >
                   Confirm Password
                 </label>
 
@@ -543,8 +770,30 @@ export default function LoginPage() {
                         .value
                     )
                   }
-                  className="input"
                   placeholder="••••••••"
+                  className="
+                    h-12
+                    w-full
+
+                    rounded-2xl
+
+                    border
+                    border-white/10
+
+                    bg-white/5
+
+                    px-4
+
+                    text-white
+
+                    outline-none
+
+                    placeholder:text-slate-500
+
+                    focus:border-violet-500
+                    focus:ring-2
+                    focus:ring-violet-500/20
+                  "
                   required
                 />
               </div>
@@ -553,43 +802,54 @@ export default function LoginPage() {
             {/* BUTTON */}
 
             <motion.button
-              type="submit"
-              disabled={
-                isLoading
-              }
               whileTap={{
                 scale: 0.98,
               }}
+              disabled={
+                isLoading
+              }
+              type="submit"
               className="
+                mt-2
+
+                flex
+                items-center
+                justify-center
+                gap-2
+
+                h-12
                 w-full
 
-                btn-primary
+                rounded-2xl
 
-                justify-center
+                bg-gradient-to-r
+                from-violet-600
+                to-indigo-600
 
-                py-2.5
+                text-white
 
-                text-base
+                font-semibold
+
+                shadow-lg
+                shadow-violet-900/30
+
+                transition-all
+
+                hover:opacity-95
               "
             >
               {isLoading ? (
-                <span
-                  className="
-                    flex
-                    items-center
-                    gap-2
-                  "
-                >
+                <>
                   <span
                     className="
-                      w-4
                       h-4
+                      w-4
+
+                      rounded-full
 
                       border-2
                       border-white
                       border-t-transparent
-
-                      rounded-full
 
                       animate-spin
                     "
@@ -598,7 +858,7 @@ export default function LoginPage() {
                   {isRegister
                     ? "Creating account..."
                     : "Authenticating..."}
-                </span>
+                </>
               ) : (
                 <>
                   <Lock
@@ -606,8 +866,8 @@ export default function LoginPage() {
                   />
 
                   {isRegister
-                    ? "Create account"
-                    : "Sign in"}
+                    ? "Create Account"
+                    : "Sign In"}
                 </>
               )}
             </motion.button>
@@ -617,42 +877,57 @@ export default function LoginPage() {
 
           <div
             className="
-              mt-5
+              mt-7
 
               text-center
 
               text-sm
+
+              text-slate-400
             "
           >
             {isRegister ? (
-              <button
-                type="button"
-                onClick={() =>
-                  setIsRegister(
-                    false
-                  )
-                }
-                className="
-                  text-accent-600
-                "
-              >
-                Already have an account?
-                Sign in
-              </button>
+              <>
+                Already have an
+                account?{" "}
+                <button
+                  onClick={() =>
+                    setIsRegister(
+                      false
+                    )
+                  }
+                  className="
+                    font-semibold
+
+                    text-violet-400
+
+                    hover:text-violet-300
+                  "
+                >
+                  Sign In
+                </button>
+              </>
             ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  setIsRegister(
-                    true
-                  )
-                }
-                className="
-                  text-accent-600
-                "
-              >
-                Create new profile
-              </button>
+              <>
+                Don’t have an
+                account?{" "}
+                <button
+                  onClick={() =>
+                    setIsRegister(
+                      true
+                    )
+                  }
+                  className="
+                    font-semibold
+
+                    text-violet-400
+
+                    hover:text-violet-300
+                  "
+                >
+                  Create One
+                </button>
+              </>
             )}
           </div>
 
@@ -660,29 +935,22 @@ export default function LoginPage() {
 
           <div
             className="
-              mt-6
-              pt-6
-
+              mt-8
               border-t
-              border-surface-100
+              border-white/10
 
-              flex
-              items-center
-              gap-2
+              pt-5
+
+              text-center
 
               text-xs
-              text-surface-400
+
+              text-slate-500
             "
           >
-            <Shield
-              size={12}
-            />
-
-            <span>
-              Enterprise secure
-              document workflow
-              system
-            </span>
+            Protected by enterprise
+            grade authentication &
+            secure workflow access
           </div>
         </div>
       </motion.div>

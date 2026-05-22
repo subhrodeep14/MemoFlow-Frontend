@@ -55,24 +55,34 @@ export default function RegisterRow({
           >
             View
           </button>
+<button
+  disabled={!row.entry}
+  className={`
+    px-4
+    py-2
 
-          <button
-            className="
-              px-4
-              py-2
+    rounded-xl
 
-              rounded-xl
+    text-xs
+    font-semibold
 
-              bg-indigo-100
-
-              text-indigo-700
-
-              text-xs
-              font-semibold
-            "
-          >
-            Upload
-          </button>
+    ${
+      row.entry
+        ? `
+          bg-indigo-100
+          text-indigo-700
+          cursor-pointer
+        `
+        : `
+          bg-slate-200
+          text-slate-400
+          cursor-not-allowed
+        `
+    }
+  `}
+>
+  Upload
+</button>
         </div>
       </td>
     </tr>
