@@ -137,7 +137,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* TOP GRID: Calendar + Day Panel */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-3">
+       <div className="grid grid-cols-1 xl:grid-cols-[1fr_480px] gap-3 justify-between">
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             lastUsed={lastUsed}
             currentUser={user}
             loading={loading}
-            onCreate={() => fetchEntries()}
+            refreshData={fetchEntries}
           />
         </motion.div>
 

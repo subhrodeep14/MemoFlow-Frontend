@@ -29,9 +29,9 @@ export default function RegisterTable({
 
 
   const user =
-  useAuthStore(
-    (state) => state.user
-  );
+    useAuthStore(
+      (state) => state.user
+    );
 
   /*
   ─────────────────────────────────────
@@ -57,13 +57,13 @@ export default function RegisterTable({
 
             FROM:
               row?.entry
-                ?.sender
+                ?.sendercompany
                 ?.name ||
               "",
 
             TO:
               row?.entry
-                ?.receiver
+                ?.receiverCompany
                 ?.name ||
               "",
 
@@ -104,15 +104,40 @@ export default function RegisterTable({
   VIEW FILE
   ─────────────────────────────────────
   */
-const handleViewFile =
-  (url) => {
+  const handleViewFile = (
+    url,
+    mimeType
+  ) => {
 
     if (!url) return;
 
+    /*
+    PDF
+    */
+
+    if (
+      mimeType ===
+      "application/pdf"
+    ) {
+
+      const viewerUrl =
+        `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(url)}`;
+
+      window.open(
+        viewerUrl,
+        "_blank"
+      );
+
+      return;
+    }
+
+    /*
+    IMAGES
+    */
+
     window.open(
       url,
-      "_blank",
-    //  "noopener,noreferrer"
+      "_blank"
     );
   };
 
@@ -149,58 +174,58 @@ const handleViewFile =
   ─────────────────────────────────────
   */
 
-const handleUpload =
-  async (
-    e,
-    entryId
-  ) => {
-    try {
+  const handleUpload =
+    async (
+      e,
+      entryId
+    ) => {
+      try {
 
-      const file =
-        e.target.files[0];
+        const file =
+          e.target.files[0];
 
-      if (!file) return;
+        if (!file) return;
 
-      /*
-      IMPORTANT
-      */
+        /*
+        IMPORTANT
+        */
 
-      e.target.value = null;
+        e.target.value = null;
 
-      const formData =
-        new FormData();
+        const formData =
+          new FormData();
 
-      formData.append(
-        "file",
-        file
-      );
+        formData.append(
+          "file",
+          file
+        );
 
-      await entryApi.uploadFile(
-        entryId,
-        formData
-      );
+        await entryApi.uploadFile(
+          entryId,
+          formData
+        );
 
-      /*
-      REFRESH FIRST
-      */
+        /*
+        REFRESH FIRST
+        */
 
-      await refreshData?.();
+        await refreshData?.();
 
-      toast.success(
-        "File uploaded"
-      );
+        toast.success(
+          "File uploaded"
+        );
 
-    } catch (err) {
+      } catch (err) {
 
-      console.log(err);
+        console.log(err);
 
-      toast.error(
-        err?.response?.data
-          ?.error ||
+        toast.error(
+          err?.response?.data
+            ?.error ||
           "Upload failed"
-      );
-    }
-  };
+        );
+      }
+    };
 
   return (
     <motion.div
@@ -374,18 +399,17 @@ const handleUpload =
 
                   p-4
 
-                  ${
-                    index %
-                      2 ===
+                  ${index %
+                    2 ===
                     0
-                      ? `
+                    ? `
                         bg-white
                         dark:bg-slate-900
 
                         border-slate-200
                         dark:border-slate-800
                       `
-                      : `
+                    : `
                         bg-indigo-100/70
                         dark:bg-slate-900/70
 
@@ -504,7 +528,7 @@ const handleUpload =
                           ?.entry
                           ?.senderCompany
                           ?.name ||
-                          "—"
+                        "—"
                       }
                     </p>
                   </div>
@@ -560,7 +584,7 @@ const handleUpload =
                           ?.entry
                           ?.receiverCompany
                           ?.name ||
-                          "—"
+                        "—"
                       }
                     </p>
                   </div>
@@ -595,7 +619,7 @@ const handleUpload =
                         ?.entry
                         ?.purpose
                         ?.name ||
-                        "—"
+                      "—"
                     }
                   </p>
                 </div>
@@ -639,9 +663,8 @@ const handleUpload =
                       <button
                         onClick={() =>
                           handleViewFile(
-                            row
-                              ?.entry
-                              ?.fileUrl
+                            row?.entry?.fileUrl,
+                            row?.entry?.fileMime
                           )
                         }
                         className="
@@ -670,15 +693,15 @@ const handleUpload =
                       </button>
 
                       {user?.role ===
-  "SUPER_ADMIN" && (<button
-                       onClick={() =>
-    handleDeleteFile(
-      row
-        ?.entry
-        ?.id
-    )
-                        }
-                        className="
+                        "SUPER_ADMIN" && (<button
+                          onClick={() =>
+                            handleDeleteFile(
+                              row
+                                ?.entry
+                                ?.id
+                            )
+                          }
+                          className="
                           h-10
                           px-4
 
@@ -695,19 +718,19 @@ const handleUpload =
                           items-center
                           gap-2
                         "
-                      >
-                        <Trash2
-                          size={14}
-                        />
+                        >
+                          <Trash2
+                            size={14}
+                          />
 
-                        Delete
-                      </button>
-                      )}
+                          Delete
+                        </button>
+                        )}
                     </>
-                  )  : row?.entry ? (
+                  ) : row?.entry ? (
 
-  <label
-    className="
+                    <label
+                      className="
       h-10
       px-4
 
@@ -726,28 +749,28 @@ const handleUpload =
 
       cursor-pointer
     "
-  >
-    <Upload size={14} />
+                    >
+                      <Upload size={14} />
 
-    Upload
+                      Upload
 
-    <input
-      type="file"
-      hidden
-      onChange={(e) =>
-        handleUpload(
-          e,
-          row?.entry?.id
-        )
-      }
-    />
-  </label>
+                      <input
+                        type="file"
+                        hidden
+                        onChange={(e) =>
+                          handleUpload(
+                            e,
+                            row?.entry?.id
+                          )
+                        }
+                      />
+                    </label>
 
-) : (
+                  ) : (
 
-  <button
-    disabled
-    className="
+                    <button
+                      disabled
+                      className="
       h-10
       px-4
 
@@ -763,12 +786,12 @@ const handleUpload =
 
       cursor-not-allowed
     "
-  >
-    No Entry
-  </button>
+                    >
+                      No Entry
+                    </button>
 
-)
-}
+                  )
+                  }
                 </div>
               </div>
             )
@@ -856,15 +879,14 @@ const handleUpload =
 
                     transition-all
 
-                    ${
-                      index %
-                        2 ===
+                    ${index %
+                      2 ===
                       0
-                        ? `
+                      ? `
                           bg-white
                           dark:bg-slate-950/30
                         `
-                        : `
+                      : `
                           bg-indigo-100/60
                           dark:bg-slate-900/60
                         `
@@ -938,7 +960,7 @@ const handleUpload =
                             ?.entry
                             ?.senderCompany
                             ?.name ||
-                            "-"
+                          "-"
                         }
                       </p>
 
@@ -954,7 +976,7 @@ const handleUpload =
                             ?.entry
                             ?.senderCompany
                             ?.code ||
-                            "-"
+                          "-"
                         }
                       </p>
                     </div>
@@ -978,7 +1000,7 @@ const handleUpload =
                             ?.entry
                             ?.receiverCompany
                             ?.name ||
-                            "-"
+                          "-"
                         }
                       </p>
 
@@ -994,7 +1016,7 @@ const handleUpload =
                             ?.entry
                             ?.receiverCompany
                             ?.code ||
-                            "-"
+                          "-"
                         }
                       </p>
                     </div>
@@ -1008,27 +1030,29 @@ const handleUpload =
                         ?.entry
                         ?.purpose
                         ?.name ||
-                        "-"
+                      "-"
                     }
                   </td>
 
                   {/* DESCRIPTION */}
 
                   <td className="px-6 py-5 max-w-[300px]">
-                    <div
-                      className="
-                        text-sm
+  <div
+    className="
+      text-sm
 
-                        text-slate-600
-                        dark:text-slate-400
+      text-slate-600
+      dark:text-slate-400
 
-                        line-clamp-2
-                      "
-                    >
-                      {row.description ||
-                        "—"}
-                    </div>
-                  </td>
+      break-words
+      whitespace-pre-wrap
+
+      leading-relaxed
+    "
+  >
+    {row.description || "—"}
+  </div>
+</td>
 
                   {/* FILE */}
 
@@ -1037,12 +1061,11 @@ const handleUpload =
                       <div className="flex gap-2">
                         <button
                           onClick={() =>
-                            handleViewFile(
-  row
-    ?.entry
-    ?.fileUrl
-)
-                          }
+  handleViewFile(
+    row?.entry?.fileUrl,
+    row?.entry?.fileMime
+  )
+}
                           className="
                             h-10
                             px-4
@@ -1068,16 +1091,16 @@ const handleUpload =
                           View
                         </button>
 
-                      {user?.role ===
-  "SUPER_ADMIN" && (  <button
-                          onClick={() =>
-                           handleDeleteFile(
-  row
-    ?.entry
-    ?.id
-)
-                          }
-                          className="
+                        {user?.role ===
+                          "SUPER_ADMIN" && (<button
+                            onClick={() =>
+                              handleDeleteFile(
+                                row
+                                  ?.entry
+                                  ?.id
+                              )
+                            }
+                            className="
                             h-10
                             px-4
 
@@ -1094,58 +1117,69 @@ const handleUpload =
                             items-center
                             gap-2
                           "
-                        >
-                          <Trash2
-                            size={14}
-                          />
+                          >
+                            <Trash2
+                              size={14}
+                            />
 
-                          Delete
-                        </button>)}
+                            Delete
+                          </button>)}
                       </div>
-                    ) :  row?.entry ? (
+                    ) : row?.entry ? (
 
-  <label
-    className="
-      h-10
-      px-4
+                      <label
+                        className="
+    h-10
+    min-w-[110px]
 
-      rounded-xl
+    px-4
 
-      bg-indigo-600
+    rounded-xl
 
-      text-white
+    bg-indigo-600
 
-      text-xs
-      font-semibold
+    text-white
 
-      flex
-      items-center
-      gap-2
+    text-xs
+    font-semibold
 
-      cursor-pointer
-    "
-  >
-    <Upload size={14} />
+    inline-flex
+    items-center
+    justify-center
+    gap-2
 
-    Upload
+    whitespace-nowrap
 
-    <input
-      type="file"
-      hidden
-      onChange={(e) =>
-        handleUpload(
-          e,
-          row?.entry?.id
-        )
-      }
-    />
-  </label>
+    cursor-pointer
 
-) : (
+    hover:bg-indigo-700
 
-  <button
-    disabled
-    className="
+    transition-all
+  "
+                      >
+                        <Upload size={14} />
+
+                        <span>
+                          Upload
+                        </span>
+
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) =>
+                            handleUpload(
+                              e,
+                              row?.entry?.id
+                            )
+                          }
+                        />
+                      </label>
+
+                    ) : (
+
+                      <button
+                        disabled
+                        className="
       h-10
       px-4
 
@@ -1161,11 +1195,11 @@ const handleUpload =
 
       cursor-not-allowed
     "
-  >
-    No Entry
-  </button>
+                      >
+                        No Entry
+                      </button>
 
-)}
+                    )}
                   </td>
                 </tr>
               )

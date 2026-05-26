@@ -6,17 +6,21 @@ import {
   motion,
   AnimatePresence,
 } from "framer-motion";
+import useAuthStore from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 import {
   ChevronDown,
-  ChevronUp,
-  Building2,
-  ArrowRight,
-  FileText,
-  ImageIcon,
-  Clock,
-  Hash,
-  BadgeCheck,
+ChevronUp,
+Building2,
+ArrowRight,
+FileText,
+ImageIcon,
+Clock,
+Hash,
+BadgeCheck,
+Trash2,
+Upload,
 } from "lucide-react";
 
 import {
@@ -46,6 +50,10 @@ export default function EntryCard({
   const hasFile =
     Boolean(entry.fileUrl);
 
+  const user =
+  useAuthStore(
+    (state) => state.user
+  );
   const isPDF =
     entry.fileMime ===
     "application/pdf";
@@ -69,7 +77,7 @@ export default function EntryCard({
         if (!file) return;
 
         setUploading(true);
-
+        
         const formData =
           new FormData();
 
@@ -82,17 +90,18 @@ export default function EntryCard({
           entry.id,
           formData
         );
-
+        toast.success(
+  "File uploaded"
+);
         onRefresh?.();
       } catch (err) {
         console.log(err);
 
-        alert(
-          "Upload failed"
-        );
+       toast.error("Upload failed")
       } finally {
         setUploading(false);
       }
+      e.target.value = null;
     };
   // ─────────────────────────────
   // DELETE FILE
@@ -103,14 +112,14 @@ export default function EntryCard({
         await entryApi.deleteFile(
           entry.id
         );
-
+        toast.success(
+  "File deleted"
+);
         onRefresh?.();
       } catch (err) {
         console.log(err);
 
-        alert(
-          "Delete failed"
-        );
+        toast.error("Delete failed")
       }
     };
   return (
@@ -491,137 +500,265 @@ export default function EntryCard({
 
               {/* FILE SECTION */}
 
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  p-3
-                  rounded-2xl
-                  bg-slate-50
-                  border
-                  border-slate-100
-                "
-              >
-                {/* ICON */}
+             {/* FILE SECTION */}
 
-                <div
-                  className={`
-                    w-10
-                    h-10
-                    rounded-xl
-                    flex
-                    items-center
-                    justify-center
-                    ${isPDF
-                      ? "bg-red-100"
-                      : "bg-blue-100"
-                    }
-                  `}
-                >
-                  {isPDF ? (
-                    <FileText
-                      size={18}
-                      className="text-red-600"
-                    />
-                  ) : (
-                    <ImageIcon
-                      size={18}
-                      className="text-blue-600"
-                    />
-                  )}
-                </div>
+<div
+  className="
+    rounded-2xl
 
-                {/* INFO */}
+    border
+    border-slate-200
+    dark:border-slate-700
 
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 truncate">
-                    {entry.fileName ||
-                      "No File Uploaded"}
-                  </p>
+    bg-gradient-to-r
+    from-slate-50
+    to-indigo-50/50
 
-                  <p className="text-xs text-slate-400">
-                    {hasFile
-                      ? "Attached File"
-                      : "Upload optional"}
-                  </p>
-                </div>
+    dark:from-slate-900
+    dark:to-slate-800/50
 
-                {/* ACTIONS */}
-
-                {hasFile ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        if (!entry.fileUrl)
-                          return;
-
-        window.open(
-  url,
-  "_blank"
-);
-                      }}
-                      className="
-    px-3
-    py-2
-    rounded-xl
-    bg-indigo-50
-    text-indigo-600
-    text-xs
-    font-semibold
-    hover:bg-indigo-100
-    transition
+    p-4
   "
-                    >
-                      View
-                    </button>
+>
 
-                    <button
-                      onClick={
-                        handleDeleteFile
-                      }
-                      className="
-                        px-3
-                        py-2
-                        rounded-xl
-                        bg-red-50
-                        text-red-600
-                        text-xs
-                        font-semibold
-                        hover:bg-red-100
-                      "
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ) : (
-                  <label
-                    className="
-                      px-3
-                      py-2
-                      rounded-xl
-                      bg-emerald-50
-                      text-emerald-600
-                      text-xs
-                      font-semibold
-                      cursor-pointer
-                      hover:bg-emerald-100
-                    "
-                  >
-                    {uploading
-                      ? "Uploading..."
-                      : "Upload"}
+  {/* TOP */}
 
-                    <input
-                      type="file"
-                      hidden
-                      onChange={
-                        handleFileUpload
-                      }
-                    />
-                  </label>
-                )}
-              </div>
+  <div className="flex items-start gap-3">
+
+    {/* ICON */}
+
+    <div
+      className={`
+        w-11
+        h-11
+
+        rounded-2xl
+
+        flex
+        items-center
+        justify-center
+
+        flex-shrink-0
+
+        ${
+          isPDF
+            ? "bg-red-100"
+            : "bg-blue-100"
+        }
+      `}
+    >
+      {isPDF ? (
+        <FileText
+          size={18}
+          className="text-red-600"
+        />
+      ) : (
+        <ImageIcon
+          size={18}
+          className="text-blue-600"
+        />
+      )}
+    </div>
+
+    {/* FILE INFO */}
+
+    <div className="flex-1 min-w-0">
+
+      <p
+        className="
+          text-sm
+          font-semibold
+
+          text-slate-700
+          dark:text-slate-200
+
+          break-all
+        "
+      >
+        {entry.fileName ||
+          "No File Uploaded"}
+      </p>
+
+      <p
+        className="
+          mt-1
+
+          text-xs
+
+          text-slate-400
+        "
+      >
+        {hasFile
+          ? entry.fileMime
+          : "Upload PDF or image"}
+      </p>
+
+    </div>
+  </div>
+
+  {/* ACTIONS */}
+
+  <div className="mt-4">
+
+    {hasFile ? (
+
+      <div className="flex flex-wrap gap-2">
+
+        {/* VIEW */}
+
+        <button
+          onClick={() => {
+
+            if (
+              !entry.fileUrl
+            ) return;
+
+            /*
+            PDF
+            */
+
+            if (
+              entry.fileMime ===
+              "application/pdf"
+            ) {
+
+              const viewerUrl =
+                `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(entry.fileUrl)}`;
+
+              window.open(
+                viewerUrl,
+                "_blank"
+              );
+
+              return;
+            }
+
+            /*
+            IMAGE
+            */
+
+            window.open(
+              entry.fileUrl,
+              "_blank"
+            );
+          }}
+
+          className="
+            h-10
+            px-4
+
+            rounded-xl
+
+            bg-emerald-500
+            hover:bg-emerald-600
+
+            text-white
+
+            text-xs
+            font-semibold
+
+            inline-flex
+            items-center
+            justify-center
+            gap-2
+
+            transition-all
+          "
+        >
+          <FileText size={14} />
+
+          View
+        </button>
+
+        {/* DELETE */}
+
+        {user?.role ===
+          "SUPER_ADMIN" && (
+
+          <button
+            onClick={
+              handleDeleteFile
+            }
+            className="
+              h-10
+              px-4
+
+              rounded-xl
+
+              bg-red-500
+              hover:bg-red-600
+
+              text-white
+
+              text-xs
+              font-semibold
+
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+
+              transition-all
+            "
+          >
+            <Trash2
+              size={14}
+            />
+
+            Delete
+          </button>
+        )}
+      </div>
+
+    ) : (
+
+      <label
+        className="
+          h-10
+          min-w-[120px]
+
+          px-4
+
+          rounded-xl
+
+          bg-indigo-600
+          hover:bg-indigo-700
+
+          text-white
+
+          text-xs
+          font-semibold
+
+          inline-flex
+          items-center
+          justify-center
+          gap-2
+
+          cursor-pointer
+
+          transition-all
+        "
+      >
+        <Upload
+          size={14}
+        />
+
+        {uploading
+          ? "Uploading..."
+          : "Upload"}
+
+        <input
+          type="file"
+          accept=".pdf,image/*"
+          hidden
+          onChange={
+            handleFileUpload
+          }
+        />
+      </label>
+    )}
+  </div>
+</div>
             </div>
           </motion.div>
         )}
