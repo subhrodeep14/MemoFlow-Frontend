@@ -203,7 +203,7 @@ export default function Layout({
             {/* LEFT */}
 
             <div className="flex items-center gap-4">
-              <button
+              {/* <button 
                 onClick={() =>
                   setMobileMenu(
                     !mobileMenu
@@ -232,7 +232,7 @@ export default function Layout({
                     dark:text-slate-300
                   "
                 />
-              </button>
+              </button>*/}
 
               {/* LOGO */}
 

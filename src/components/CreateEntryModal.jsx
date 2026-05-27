@@ -184,7 +184,16 @@ await entryApi.create({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3"
+         className="
+  fixed inset-0 z-[100]
+
+  bg-black/40
+  backdrop-blur-sm
+
+  flex
+
+  overflow-hidden
+"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.97, y: 8 }}
@@ -193,13 +202,17 @@ await entryApi.create({
             transition={{ duration: 0.18 }}
             onClick={(e) => e.stopPropagation()}
             className="
-              relative w-full max-w-lg
-              max-h-[60vh]
+           relative
+
+w-full
+h-full
+
+overflow-hidden
               rounded-2xl
               border border-slate-200 dark:border-slate-800
               bg-white dark:bg-slate-950
               shadow-2xl shadow-black/20
-              flex flex-col overflow-scroll-hidden
+              flex flex-col 
             "
           >
             {/* HEADER */}
@@ -217,7 +230,16 @@ await entryApi.create({
             </div>
 
             {/* BODY */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 overscroll-contain">
+            <div className="flex-1
+
+overflow-y-auto
+
+px-5
+py-4
+
+space-y-4
+
+min-h-0">
 
               {/* SENDER */}
               <div className="flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5 px-3.5 py-3">

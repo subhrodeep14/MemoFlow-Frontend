@@ -63,9 +63,11 @@ export default function DayPanel({
   flex
   flex-col
 
-  h-full
-  min-h-[420px]
-  max-h-[78vh]
+h-full
+
+min-h-[650px]
+
+max-h-[88vh]
 
   overflow-hidden
 
