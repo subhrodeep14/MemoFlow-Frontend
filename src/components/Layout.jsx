@@ -22,7 +22,7 @@ import {
 import SwitchCompanyDropdown from "./company/SwitchCompanyDropdown";
 
 import { motion } from "framer-motion";
-
+import logo from "../public/logo.png";
 import {
   useNavigate,
   useLocation,
@@ -48,7 +48,11 @@ const activeCompany =
   useAuthStore(
     (s) => s.activeCompany
   );
-
+const displayName =
+  user?.name?.trim()
+    ? user.name
+    : user?.email?.split("@")[0] ||
+      "User";
 const isAdmin =
   user?.role === "ADMIN";
 
@@ -229,7 +233,7 @@ const [
             {/* LEFT */}
 
             <div className="flex items-center gap-4">
-              <button 
+              {/* <button 
                 onClick={() =>
                   setMobileMenu(
                     !mobileMenu
@@ -258,87 +262,127 @@ const [
                     dark:text-slate-300
                   "
                 />
-              </button>
+              </button> */}
 
               {/* LOGO */}
 
-              <motion.div
-                whileHover={{
-                  scale: 1.03,
-                }}
-                className="
-                  flex
-                  items-center
-                  gap-3
-                "
-              >
-                <div className="relative">
-                  <div
-                    className="
-                      absolute
-                      inset-0
+      
 
-                      bg-indigo-500
+<motion.button
+  whileHover={{
+    scale: 1.03,
+  }}
+  whileTap={{
+    scale: 0.97,
+  }}
+  onClick={() =>
+    navigate("/dashboard")
+  }
+  className="
+    flex
+    items-center
+    gap-4
 
-                      blur-xl
+    rounded-2xl
 
-                      opacity-40
-                    "
-                  />
+    px-3
+    py-2
 
-                  <div
-                    className="
-                      relative
+    hover:bg-white/70
+    dark:hover:bg-slate-800/60
 
-                      w-12
-                      h-12
+    transition-all
+    duration-300
+  "
+>
+  {/* LOGO */}
+  <div className="relative">
+    {/* Glow */}
+    <div
+      className="
+        absolute
+        inset-0
 
-                      rounded-2xl
+        rounded-2xl
 
-                      bg-gradient-to-br
-                      from-indigo-600
-                      via-violet-600
-                      to-purple-600
+        bg-indigo-500/30
 
-                      flex
-                      items-center
-                      justify-center
+        blur-2xl
+      "
+    />
 
-                      shadow-lg
-                      shadow-indigo-500/30
-                    "
-                  >
-                    <Shield
-                      size={20}
-                      className="text-white"
-                    />
-                  </div>
-                </div>
+    <div
+      className="
+        relative
 
-                <div>
-                  <h1
-                    className="
-                      text-lg
-                      font-bold
-                      tracking-tight
+        w-20
+        h-14
 
-                      text-slate-800
-                      dark:text-white
-                    "
-                  >
-                    MEMO FLOW 
-                  </h1>
+        rounded-2xl
 
-                  <p
-                    className="
-                      text-xs
-                      text-slate-400
-                    "
-                  >
-                    Dispatch Register
-                  </p>
-                </div>
-              </motion.div>
+        bg-white
+     
+        text-emerald-700
+         dark:bg-emerald-200
+        border
+        border-slate-200
+        dark:border-slate-700
+
+        shadow-xl
+        shadow-indigo-500/10
+
+        flex
+        items-center
+        justify-center
+
+        overflow-hidden
+      "
+    >
+      <img
+        src={logo}
+        alt="MemoFlow"
+        className="
+          w-full
+          h-full
+          object-contain
+          p-1
+        "
+      />
+    </div>
+  </div>
+
+  {/* TEXT */}
+  <div className="text-left">
+    <h1
+      className="
+        text-xl
+        font-extrabold
+
+        tracking-tight
+
+        text-slate-900
+        dark:text-white
+      "
+    >
+      MemoFlow
+    </h1>
+
+    <p
+      className="
+        text-xs
+
+        font-medium
+
+        text-slate-500
+        dark:text-slate-400
+
+        tracking-wide
+      "
+    >
+      Digital Dispatch Register
+    </p>
+  </div>
+</motion.button>
             </div>
 
             {/* SEARCH */}
@@ -512,55 +556,99 @@ const [
 
   {/* USER */}
 
-  <div
-    className="
-      hidden
-      md:flex
+ <div
+  className="
+    hidden
+    md:flex
 
-      items-center
-      gap-3
+    items-center
+    gap-3
 
-      pl-3
+    pl-4
+    ml-2
 
-      border-l
-      border-slate-200
-      dark:border-slate-800
-    "
-  >
+    border-l
+    border-slate-200
+    dark:border-slate-800
+  "
+>
+  {/* Avatar */}
+
+  <div className="relative">
     <div
       className="
-        w-10
-        h-10
+        absolute
+        inset-0
 
-        rounded-xl
+        rounded-2xl
+
+        bg-indigo-500/20
+
+        blur-lg
+      "
+    />
+
+    <div
+      className="
+        relative
+
+        w-11
+        h-11
+
+        rounded-2xl
 
         bg-gradient-to-br
-        from-indigo-500
-        to-violet-500
+        from-indigo-600
+        via-violet-600
+        to-purple-600
+
+        text-white
 
         flex
         items-center
         justify-center
+
+        font-bold
+        text-sm
+
+        shadow-lg
+        shadow-indigo-500/20
       "
     >
-      {user?.name?.charAt(0)?.toUpperCase()}
-    </div>
-
-    <div className="hidden xl:block">
-      <p
-        className="
-          text-sm
-          font-semibold
-
-          text-slate-700
-          dark:text-slate-200
-        "
-      >
-        {user?.name ||
-          user?.email}
-      </p>
+      {displayName
+        ?.charAt(0)
+        ?.toUpperCase()}
     </div>
   </div>
+
+  {/* User Info */}
+
+  <div className="hidden xl:block">
+    <p
+      className="
+        text-sm
+        font-semibold
+
+        text-slate-800
+        dark:text-white
+      "
+    >
+      {displayName}
+    </p>
+
+    <p
+      className="
+        text-xs
+
+        text-slate-500
+        dark:text-slate-400
+      "
+    >
+      {user?.role
+        ?.replace("_", " ")}
+    </p>
+  </div>
+</div>
 
   {/* LOGOUT */}
 
