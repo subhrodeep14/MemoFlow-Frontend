@@ -12,11 +12,21 @@ import {
   Search,
   Menu,
 } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+} from "lucide-react";
+
+
+
+import SwitchCompanyDropdown from "./company/SwitchCompanyDropdown";
 
 import { motion } from "framer-motion";
 
-import { useNavigate } from "react-router-dom";
-
+import {
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 
 import useAuthStore from "../hooks/useAuth";
@@ -25,25 +35,40 @@ export default function Layout({
   children,
   onSearch,
 }) {
-  const navigate =
-    useNavigate();
+const navigate =
+  useNavigate();
 
-  const { user, logout } =
-    useAuthStore();
+const location =
+  useLocation();
 
-  const [isDark, setIsDark] =
-    useState(() => {
-      return (
-        localStorage.getItem(
-          "theme"
-        ) === "dark"
-      );
-    });
+const { user, logout } =
+  useAuthStore();
 
-  const [
-    mobileMenu,
-    setMobileMenu,
-  ] = useState(false);
+const activeCompany =
+  useAuthStore(
+    (s) => s.activeCompany
+  );
+
+const isAdmin =
+  user?.role === "ADMIN";
+
+const isSuperAdmin =
+  user?.role ===
+  "SUPER_ADMIN";
+
+const [isDark, setIsDark] =
+  useState(() => {
+    return (
+      localStorage.getItem(
+        "theme"
+      ) === "dark"
+    );
+  });
+
+const [
+  mobileMenu,
+  setMobileMenu,
+] = useState(false);
 
   /*
    ─────────────────────────────────────
@@ -188,6 +213,7 @@ export default function Layout({
             backdrop-blur-xl
           "
         >
+          
           <div
             className="
               h-full
@@ -203,7 +229,7 @@ export default function Layout({
             {/* LEFT */}
 
             <div className="flex items-center gap-4">
-              {/* <button 
+              <button 
                 onClick={() =>
                   setMobileMenu(
                     !mobileMenu
@@ -232,7 +258,7 @@ export default function Layout({
                     dark:text-slate-300
                   "
                 />
-              </button>*/}
+              </button>
 
               {/* LOGO */}
 
@@ -317,283 +343,261 @@ export default function Layout({
 
             {/* SEARCH */}
 
-            <div
-              className="
-                hidden
-                lg:flex
-
-                flex-1
-
-                max-w-xl
-
-                mx-10
-              "
-            >
-              {/* <button
-                onClick={onSearch}
-                className="
-                  w-full
-
-                  flex
-                  items-center
-                  gap-3
-
-                  px-4
-                  h-12
-
-                  rounded-2xl
-
-                  bg-slate-100
-                  dark:bg-slate-900
-
-                  border
-                  border-slate-200
-                  dark:border-slate-800
-                "
-              >
-                <Search
-                  size={16}
-                  className="
-                    text-slate-400
-                  "
-                />
-
-                <span
-                  className="
-                    text-sm
-                    text-slate-400
-                  "
-                >
-                  Search memo...
-                </span>
-              </button> */}
-            </div>
+          
 
             {/* RIGHT */}
 
-            <div className="flex items-center gap-3">
-              {/* NOTIFICATION */}
+          <div
+  className="
+    flex
+    items-center
+    gap-3
 
-              {/* <button
-                className="
-                  relative
+    bg-white/40
+    dark:bg-slate-900/40
 
-                  w-11
-                  h-11
+    px-3
+    py-2
 
-                  rounded-2xl
+    rounded-2xl
 
-                  bg-slate-100
-                  dark:bg-slate-800
+    border
+    border-slate-200/60
+    dark:border-slate-800/60
+  "
+>
+  {(isAdmin ||
+    isSuperAdmin) && (
+    <div className="hidden lg:block">
+      <SwitchCompanyDropdown />
+    </div>
+  )}
+  
 
-                  flex
-                  items-center
-                  justify-center
-                "
-              >
-                <Bell
-                  size={18}
-                  className="
-                    text-slate-600
-                    dark:text-slate-300
-                  "
-                />
+  {(isAdmin ||
+    isSuperAdmin) && (
+    <button
+      onClick={() =>
+        navigate(
+          location.pathname ===
+            "/admin/companies"
+            ? "/dashboard"
+            : "/admin/companies"
+        )
+      }
+      className="
+        hidden
+        md:flex
 
-                <span
-                  className="
-                    absolute
-                    top-2
-                    right-2
+        h-10
+        px-4
 
-                    w-2
-                    h-2
+        rounded-xl
 
-                    rounded-full
+        bg-indigo-600
 
-                    bg-red-500
-                  "
-                />
-              </button> */}
+        text-white
 
-              {/* DARK MODE */}
+        text-xs
+        font-semibold
 
-              <button
-                onClick={() =>
-                  setIsDark(
-                    (v) => !v
-                  )
-                }
-                className="
-                  w-11
-                  h-11
+        items-center
+        gap-2
 
-                  rounded-2xl
+        hover:bg-indigo-700
 
-                  bg-slate-100
-                  dark:bg-slate-800
+        transition-all
+      "
+    >
+      <LayoutDashboard
+        size={14}
+      />
 
-                  flex
-                  items-center
-                  justify-center
-                "
-              >
-                {isDark ? (
-                  <Sun
-                    size={18}
-                    className="
-                      text-yellow-400
-                    "
-                  />
-                ) : (
-                  <Moon
-                    size={18}
-                    className="
-                      text-slate-600
-                    "
-                  />
-                )}
-              </button>
+      {location.pathname ===
+      "/admin/companies"
+        ? "Dashboard"
+        : "Company Panel"}
+    </button>
+  )}
 
-              {/* USER */}
+  <div
+    className="
+      hidden
+      xl:flex
 
-              <div
-                className="
-                  hidden
-                  sm:flex
+      h-10
+      px-3
 
-                  items-center
-                  gap-3
+      rounded-xl
 
-                  pl-3
-                  ml-2
+      bg-violet-50
+      dark:bg-violet-500/10
 
-                  border-l
-                  border-slate-200
-                  dark:border-slate-800
-                "
-              >
-                <div
-                  className="
-                    w-11
-                    h-11
+      items-center
+      gap-2
 
-                    rounded-2xl
+      text-xs
+      font-semibold
 
-                    bg-gradient-to-br
-                    from-indigo-500
-                    to-violet-500
+      text-violet-700
+      dark:text-violet-300
+    "
+  >
+    {user?.role?.replace(
+      "_",
+      " "
+    )}
+  </div>
 
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-                  <User
-                    size={18}
-                    className="text-white"
-                  />
-                </div>
+  {activeCompany && (
+    <div
+      className="
+        hidden
+        xl:flex
 
-                <div className="hidden xl:block">
-                  <p
-                    className="
-                      text-sm
-                      font-semibold
+        h-10
+        px-3
 
-                      text-slate-700
-                      dark:text-slate-200
-                    "
-                  >
-                    {user?.email ||
-                      "Admin"}
-                  </p>
+        rounded-xl
 
-                  {/* <p
-                    className="
-                      text-xs
-                      text-slate-400
-                    "
-                  >
-                    Super Admin
-                  </p> */}
-                </div>
-              </div>
+        bg-emerald-50
+        dark:bg-emerald-500/10
 
-              {/* LOGOUT */}
+        items-center
+        gap-2
 
-              <button
-                onClick={
-                  handleLogout
-                }
-                className="
-                  w-11
-                  h-11
+        text-xs
+        font-semibold
 
-                  rounded-2xl
+        text-emerald-700
+        dark:text-emerald-300
+      "
+    >
+      <Building2
+        size={13}
+      />
 
-                  bg-red-50
-                  dark:bg-red-500/10
+      {activeCompany.name}
+    </div>
+  )}
 
-                  flex
-                  items-center
-                  justify-center
-                "
-              >
-                <LogOut
-                  size={18}
-                  className="
-                    text-red-500
-                  "
-                />
-              </button>
-            </div>
+  {/* DARK MODE */}
+
+  <button
+    onClick={() =>
+      setIsDark(
+        (v) => !v
+      )
+    }
+    className="
+      w-11
+      h-11
+
+      rounded-2xl
+
+      bg-slate-100
+      dark:bg-slate-800
+
+      flex
+      items-center
+      justify-center
+    "
+  >
+    {isDark ? (
+      <Sun size={18} className="text-yellow-400" />
+    ) : (
+      <Moon size={18} className="text-blue-400" />
+    )}
+  </button>
+
+  {/* USER */}
+
+  <div
+    className="
+      hidden
+      md:flex
+
+      items-center
+      gap-3
+
+      pl-3
+
+      border-l
+      border-slate-200
+      dark:border-slate-800
+    "
+  >
+    <div
+      className="
+        w-10
+        h-10
+
+        rounded-xl
+
+        bg-gradient-to-br
+        from-indigo-500
+        to-violet-500
+
+        flex
+        items-center
+        justify-center
+      "
+    >
+      {user?.name?.charAt(0)?.toUpperCase()}
+    </div>
+
+    <div className="hidden xl:block">
+      <p
+        className="
+          text-sm
+          font-semibold
+
+          text-slate-700
+          dark:text-slate-200
+        "
+      >
+        {user?.name ||
+          user?.email}
+      </p>
+    </div>
+  </div>
+
+  {/* LOGOUT */}
+
+  <button
+    onClick={
+      handleLogout
+    }
+    className="
+      w-11
+      h-11
+
+      rounded-2xl
+
+      bg-red-50
+      dark:bg-red-500/10
+
+      flex
+      items-center
+      justify-center
+    "
+  >
+    <LogOut
+      size={18}
+      className="
+        text-red-500
+      "
+    />
+  </button>
+</div>
           </div>
         </motion.header>
 
+        
+        
+
         {/* MOBILE SEARCH */}
 
-        {/* {mobileMenu && (
-          <div className="lg:hidden px-4 pt-4">
-            <button
-              onClick={onSearch}
-              className="
-                w-full
-
-                flex
-                items-center
-                gap-3
-
-                px-4
-                h-12
-
-                rounded-2xl
-
-                bg-white
-                dark:bg-slate-900
-
-                border
-                border-slate-200
-                dark:border-slate-800
-              "
-            >
-              <Search
-                size={16}
-                className="
-                  text-slate-400
-                "
-              />
-
-              <span
-                className="
-                  text-sm
-                  text-slate-400
-                "
-              >
-                Search memos...
-              </span>
-            </button>
-          </div>
-        )} */}
 
         {/* CONTENT */}
 

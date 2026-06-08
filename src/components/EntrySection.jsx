@@ -83,7 +83,8 @@ const dateStr =
 
       const res =
         await entryApi.getByDate(
-          dateStr
+          dateStr,
+        
         );
 
       setEntries(

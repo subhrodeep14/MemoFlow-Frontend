@@ -25,9 +25,31 @@ export default function RegisterTable({
   rows = [],
   lastUsed = 0,
   refreshData,
-}) {
+  selectedYear,
+  onRowsIncreased,
+}){
 
+  const handleAddRows =
+  async () => {
+    try {
+      const res =
+        await entryApi.increaseRegisterRows(
+          selectedYear
+        );
 
+      toast.success(
+        `Register expanded to ${res.data.totalRows} rows`
+      );
+
+      onRowsIncreased?.();
+    } catch (err) {
+      console.error(err);
+
+      toast.error(
+        "Failed to add rows"
+      );
+    }
+  };
   const user =
     useAuthStore(
       (state) => state.user
@@ -57,7 +79,7 @@ export default function RegisterTable({
 
             FROM:
               row?.entry
-                ?.sendercompany
+                ?.senderCompany
                 ?.name ||
               "",
 
@@ -289,7 +311,7 @@ export default function RegisterTable({
               dark:text-white
             "
           >
-            Dispatch Register
+           {selectedYear} Dispatch Register
           </h2>
 
           <p
@@ -376,6 +398,34 @@ export default function RegisterTable({
 
             Export
           </button>
+          <button
+  onClick={handleAddRows}
+  className="
+    h-10
+    px-4
+
+    rounded-2xl
+
+    bg-emerald-600
+
+    text-white
+
+    text-xs
+    md:text-sm
+
+    font-semibold
+
+    flex
+    items-center
+    gap-2
+
+    hover:bg-emerald-700
+
+    transition-all
+  "
+>
+  +20 Rows
+</button>
         </div>
       </div>
 

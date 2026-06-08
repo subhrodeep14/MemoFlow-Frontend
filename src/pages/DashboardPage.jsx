@@ -25,11 +25,21 @@ export default function DashboardPage() {
   const [showSearch, setShowSearch] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sheetLimit, setSheetLimit] = useState(100);
+  const [
+  selectedYear,
+  setSelectedYear,
+] = useState(
+  new Date().getFullYear()
+);
 
   const fetchEntries = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await entryApi.search({ limit: 500 });
+      const res =
+  await entryApi.search({
+    limit: 500,
+    year: selectedYear,
+  });
       setEntries(res.data.entries || []);
     } catch (err) {
       console.error(err);
@@ -37,7 +47,10 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedYear,
+    activeCompany?.id,
+    
+  ]);
 
   useEffect(() => {
     fetchEntries();
@@ -73,6 +86,24 @@ export default function DashboardPage() {
     };
   });
 
+  const loadRegisterSettings =
+  async () => {
+    try {
+      const res =
+        await entryApi.getRegisterSettings(
+          selectedYear
+        );
+
+      setSheetLimit(
+        res.data.totalRows
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+  loadRegisterSettings();
+}, [selectedYear]);
   const usedDates = entries.map((e) => e.date);
   const lastUsed =
     entries.length > 0
@@ -87,54 +118,154 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-3 min-h-0">
 
         {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
+      {/* MOBILE / TABLET HEADER */}
+
+<div className="block xl:hidden">
+  <motion.div
+    initial={{ opacity: 0, y: 6 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="
+      rounded-xl
+
+      border
+      border-slate-200/70
+      dark:border-slate-800
+
+      bg-white/90
+      dark:bg-slate-950/80
+
+      backdrop-blur-xl
+
+      p-3
+
+      shadow-sm
+    "
+  >
+    <div className="flex flex-wrap gap-2">
+
+      {activeCompany && (
+        <div
           className="
+            h-10
+            px-3
+
             rounded-xl
-            border border-slate-200/70 dark:border-slate-800
-            bg-white/90 dark:bg-slate-950/80
-            backdrop-blur-xl
-            px-4 py-3
-            shadow-sm
+
+            bg-emerald-50
+            dark:bg-emerald-500/10
+
+            flex
+            items-center
+            gap-2
+
+            text-xs
+            font-semibold
+
+            text-emerald-700
+            dark:text-emerald-300
           "
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">MemoFlow</h1>
-              <p className="text-xs text-slate-400 mt-0.5">Enterprise document workflow dashboard</p>
-            </div>
+          <Building2 size={14} />
 
-            <div className="flex flex-wrap items-center gap-2">
-              {(isSuperAdmin || isAdmin) && (
-                <button
-                  onClick={() => navigate("/admin/companies")}
-                  className="h-8 px-3.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                >
-                  <LayoutDashboard size={13} />
-                  Company Panel
-                </button>
-              )}
+          <span className="max-w-[140px] truncate">
+            {activeCompany.name}
+          </span>
+        </div>
+      )}
 
-              <div className="h-8 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
-                <ShieldCheck size={13} />
-                {user?.role?.replace("_", " ")}
-              </div>
+      <div
+        className="
+          h-10
+          px-3
 
-              {activeCompany && (
-                <div className="h-8 px-3 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300">
-                  <Building2 size={13} />
-                  {activeCompany.name}
-                </div>
-              )}
+          rounded-xl
 
-              <div className="h-8 px-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
-                <User2 size={13} />
-                {user?.name || "User"}
-              </div>
-            </div>
-          </div>
-        </motion.div>
+          bg-violet-50
+          dark:bg-violet-500/10
+
+          flex
+          items-center
+          gap-2
+
+          text-xs
+          font-semibold
+
+          text-violet-700
+          dark:text-violet-300
+        "
+      >
+        <ShieldCheck size={14} />
+
+        {user?.role?.replace(
+          "_",
+          " "
+        )}
+      </div>
+
+      <div
+        className="
+          h-10
+          px-3
+
+          rounded-xl
+
+          bg-amber-50
+          dark:bg-amber-500/10
+
+          flex
+          items-center
+          gap-2
+
+          text-xs
+          font-semibold
+
+          text-amber-700
+          dark:text-amber-300
+        "
+      >
+        <User2 size={14} />
+
+        {user?.name}
+      </div>
+
+      {(isAdmin ||
+        isSuperAdmin) && (
+        <button
+          onClick={() =>
+            navigate(
+              "/admin/companies"
+            )
+          }
+          className="
+            h-10
+            px-4
+
+            rounded-xl
+
+            bg-gradient-to-r
+            from-indigo-600
+            to-violet-600
+
+            text-white
+
+            text-xs
+            font-semibold
+
+            flex
+            items-center
+            gap-2
+          "
+        >
+          <LayoutDashboard
+            size={14}
+          />
+
+          Company Panel
+        </button>
+      )}
+    </div>
+  </motion.div>
+</div>
 
         {/* TOP GRID: Calendar + Day Panel */}
        <div className="grid grid-cols-1 xl:grid-cols-[1fr_480px] gap-3 justify-between">
@@ -153,11 +284,16 @@ export default function DashboardPage() {
             "
           >
             <CustomCalendar
-              selectedDate={selectedDate}
-              onDateClick={(date) => setSelectedDate(date)}
-              usedDates={usedDates}
-              lastUsed={lastUsed}
-            />
+  selectedDate={selectedDate}
+  onDateClick={(date) =>
+    setSelectedDate(date)
+  }
+  usedDates={usedDates}
+  lastUsed={lastUsed}
+  onYearChange={
+    setSelectedYear
+  }
+/>
           </motion.div>
 
           <motion.div
@@ -181,12 +317,16 @@ export default function DashboardPage() {
           transition={{ delay: 0.1 }}
         >
           <RegisterTable
-            rows={rows}
-            lastUsed={lastUsed}
-            currentUser={user}
-            loading={loading}
-            refreshData={fetchEntries}
-          />
+  rows={rows}
+  lastUsed={lastUsed}
+  currentUser={user}
+  loading={loading}
+  refreshData={fetchEntries}
+  selectedYear={selectedYear}
+  onRowsIncreased={
+    loadRegisterSettings
+  }
+/>
         </motion.div>
 
         {/* SEARCH MODAL */}

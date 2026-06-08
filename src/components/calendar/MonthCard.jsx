@@ -208,10 +208,13 @@ const fixedUsedDates =
     );
   });
 
+const count =
+  fixedUsedDates.filter(
+    (d) => d === dayKey
+  ).length;
+
 const used =
-  fixedUsedDates.includes(
-    dayKey
-  );
+  count > 0;
           /*
           SELECTED
           */
@@ -253,6 +256,7 @@ const used =
               holiday={
                 holiday
               }
+              count={count}
               onClick={() =>
                 onDateClick(
                   dayKey

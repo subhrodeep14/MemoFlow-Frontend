@@ -122,22 +122,30 @@ export const entryApi = {
       }
     ),
 
-  getByDate: (date) =>
+  getByDate: (
+  date,
+  year
+) =>
+  api.get(
+    "/entry/by-date",
+    {
+      params: {
+        date,
+        year,
+      },
+    }
+  ),
+
+ getAvailableSlNumbers:
+  (year) =>
     api.get(
-      "/entry/by-date",
+      "/entry/sl-numbers",
       {
         params: {
-          date,
+          year,
         },
       }
     ),
-
-  getAvailableSlNumbers:
-    () =>
-      api.get(
-        "/entry/sl-numbers"
-      ),
-
   searchCompanies: (
     query
   ) =>
@@ -161,7 +169,14 @@ export const entryApi = {
         },
       }
     ),
-
+updateEntry: (
+  id,
+  data
+) =>
+  api.put(
+    `/entry/${id}`,
+    data
+  ),
   uploadFile: (
     id,
     formData
@@ -174,6 +189,35 @@ export const entryApi = {
           "Content-Type":
             "multipart/form-data",
         },
+      }
+    ),
+    getRegisterSettings:
+  (year) =>
+    api.get(
+      "/entry/register-settings",
+      {
+        params: {
+          year,
+        },
+      }
+    ),
+importRegister: (formData) =>
+  api.post(
+    "/import/register",
+    formData,
+    {
+      headers: {
+        "Content-Type":
+          "multipart/form-data",
+      },
+    }
+  ),
+increaseRegisterRows:
+  (year) =>
+    api.post(
+      "/entry/register-settings/increase",
+      {
+        year,
       }
     ),
 
@@ -338,6 +382,8 @@ export const calendarApi = {
   getAll: () =>
     api.get("/calendar"),
 };
+
+
 
 /*
 ──────────────────────────────────────

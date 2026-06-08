@@ -19,7 +19,7 @@ import useAuthStore from "./hooks/useAuth";
 /*
 PAGES
 */
-
+import ImportRegisterPage from "./pages/ImportRegisterPage";
 import LoginPage from "./pages/LoginPage";
 
 import DashboardPage from "./pages/DashboardPage";
@@ -243,13 +243,22 @@ export default function App() {
         {/* COMPANY PANEL */}
 
         <Route
-          path="/admin/companies"
-          element={
-            <ProtectedRoute>
-              <CompanyManagementPage />
-            </ProtectedRoute>
-          }
-        />
+  path="/admin/companies"
+  element={
+    <ProtectedRoute>
+      <CompanyManagementPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/import-register"
+  element={
+    <ProtectedRoute>
+      <ImportRegisterPage />
+    </ProtectedRoute>
+  }
+/>
 
         {/* ROOT */}
 

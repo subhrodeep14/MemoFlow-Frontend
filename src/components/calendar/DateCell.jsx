@@ -12,10 +12,49 @@ export default function DateCell({
   weekend,
   holiday,
   onClick,
+  count,
 }) {
   const today =
     isToday(day);
+    const badgeStyle =
+  count <= 3
+    ? `
+      bg-emerald-500
+      shadow-emerald-500/30
+    `
+    : count <= 10
+    ? `
+      bg-amber-500
+      shadow-amber-500/30
+    `
+    : `
+      bg-rose-500
+      shadow-rose-500/30
+    `;
+const memoStyle =
+  count <= 2
+    ? `
+      bg-emerald-50
+      dark:bg-emerald-500/10
 
+      border-emerald-200
+      dark:border-emerald-500/20
+    `
+    : count <= 5
+    ? `
+      bg-emerald-100
+      dark:bg-emerald-500/20
+
+      border-emerald-300
+      dark:border-emerald-500/40
+    `
+    : `
+      bg-emerald-200
+      dark:bg-emerald-500/30
+
+      border-emerald-400
+      dark:border-emerald-500/60
+    `;
   return (
     <motion.button
       whileHover={{
@@ -85,17 +124,13 @@ export default function DateCell({
               border-red-100
               dark:border-red-500/20
             `
-            : used
-            ? `
-              bg-emerald-50
-              dark:bg-emerald-500/10
+          : used
+? `
+  ${memoStyle}
 
-              text-emerald-700
-              dark:text-emerald-300
-
-              border-emerald-200
-              dark:border-emerald-500/20
-            `
+  text-emerald-700
+  dark:text-emerald-300
+`
             : `
               bg-white
               dark:bg-slate-900
@@ -111,24 +146,46 @@ export default function DateCell({
     >
       {format(day, "d")}
         
-      {used &&
-        !selected &&
-        !today && (
-          <span
-            className="
-              absolute
-              bottom-1
-              right-1
+{count > 0 &&
+  !selected &&
+  !today && (
+    <div
+      className={`
+        absolute
 
-              w-1.5
-              h-1.5
+        -top-1
+        -right-1
 
-              rounded-full
+        min-w-[18px]
+        h-[18px]
 
-              bg-emerald-500
-            "
-          />
-        )}
+        px-1
+
+        rounded-full
+
+        text-white
+
+        text-[9px]
+        font-bold
+
+        flex
+        items-center
+        justify-center
+
+        shadow-md
+
+        border
+        border-white
+        dark:border-slate-900
+
+        ${badgeStyle}
+      `}
+    >
+      {count > 99
+        ? "99+"
+        : count}
+    </div>
+)}
     </motion.button>
   );
 }

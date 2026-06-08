@@ -193,6 +193,8 @@ export default function CompanyManagementPage() {
                   Create Company
                 </button>
               )}
+
+              
             </div>
           </div>
 

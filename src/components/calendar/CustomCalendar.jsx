@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
+import DatePicker from "react-datepicker";
 
+import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
 
 import MonthCard from "./MonthCard";
@@ -21,6 +23,7 @@ export default function CustomCalendar({
   onDateClick,
   usedDates = [],
   lastUsed ,
+  onYearChange,
 }) {
   /*
    ─────────────────────────────────────
@@ -29,7 +32,10 @@ export default function CustomCalendar({
   */
 
   const [currentMonth, setCurrentMonth] =
-    useState(new Date());
+  useState(new Date());
+
+const [showPicker, setShowPicker] =
+  useState(false);
 
   /*
    ─────────────────────────────────────
@@ -154,14 +160,21 @@ export default function CustomCalendar({
             whileTap={{
               scale: 0.95,
             }}
-            onClick={() =>
-              setCurrentMonth(
-                subMonths(
-                  currentMonth,
-                  1
-                )
-              )
-            }
+            onClick={() => {
+  const newMonth =
+    subMonths(
+      currentMonth,
+      1
+    );
+
+  setCurrentMonth(
+    newMonth
+  );
+
+  onYearChange?.(
+    newMonth.getFullYear()
+  );
+}}
             className="
               w-11
               h-11
@@ -192,32 +205,97 @@ export default function CustomCalendar({
 
           {/* YEAR */}
 
-          <div
-            className="
-              px-5
-              h-11
+          {/* MONTH / YEAR PICKER */}
 
-              rounded-2xl
+<div className="relative">
 
-              bg-indigo-600
+  <button
+    onClick={() =>
+      setShowPicker(
+        !showPicker
+      )
+    }
+    className="
+      px-5
+      h-11
 
-              text-white
+      rounded-2xl
 
-              flex
-              items-center
+      bg-indigo-600
 
-              text-sm
-              font-semibold
+      text-white
 
-              shadow-lg
-              shadow-indigo-500/20
-            "
-          >
-            {format(
-              currentMonth,
-              "yyyy"
-            )}
-          </div>
+      flex
+      items-center
+      gap-2
+
+      text-sm
+      font-semibold
+
+      shadow-lg
+      shadow-indigo-500/20
+    "
+  >
+    <CalendarDays
+      size={16}
+    />
+
+    {format(
+      currentMonth,
+      "MMM yyyy"
+    )}
+  </button>
+
+  {showPicker && (
+  <div
+    className="
+      absolute
+      top-14
+      right-0
+
+      z-[9999]
+
+      rounded-2xl
+
+      overflow-hidden
+
+      border
+      border-slate-700
+
+      bg-slate-900
+
+      shadow-2xl
+    "
+  >
+    <DatePicker
+      inline
+      selected={
+        selectedDate
+          ? new Date(
+              selectedDate
+            )
+          : new Date()
+      }
+      showMonthDropdown
+      showYearDropdown
+      dropdownMode="select"
+      onChange={(date) => {
+        if (!date) return;
+
+       setCurrentMonth(date);
+
+onYearChange?.(
+  date.getFullYear()
+);
+
+onDateClick(date);
+
+setShowPicker(false);
+      }}
+    />
+  </div>
+)}
+</div>
 
           {/* NEXT */}
 
@@ -225,14 +303,21 @@ export default function CustomCalendar({
             whileTap={{
               scale: 0.95,
             }}
-            onClick={() =>
-              setCurrentMonth(
-                addMonths(
-                  currentMonth,
-                  1
-                )
-              )
-            }
+      onClick={() => {
+  const newMonth =
+    addMonths(
+      currentMonth,
+      1
+    );
+
+  setCurrentMonth(
+    newMonth
+  );
+
+  onYearChange?.(
+    newMonth.getFullYear()
+  );
+}}
             className="
               w-11
               h-11

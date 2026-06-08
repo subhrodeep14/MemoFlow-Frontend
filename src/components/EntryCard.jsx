@@ -1,14 +1,16 @@
 // src/components/EntryCard.jsx
 
 import { useState } from "react";
-
+import EditEntryModal from "./EditEntryModal";
 import {
   motion,
   AnimatePresence,
 } from "framer-motion";
 import useAuthStore from "../hooks/useAuth";
 import toast from "react-hot-toast";
-
+import {
+  Pencil
+} from "lucide-react";
 import {
   ChevronDown,
 ChevronUp,
@@ -43,7 +45,10 @@ export default function EntryCard({
 }) {
   const [expanded, setExpanded] =
     useState(false);
-
+  const [
+  showEditModal,
+  setShowEditModal
+] = useState(false);
   const [uploading, setUploading] =
     useState(false);
 
@@ -594,7 +599,23 @@ export default function EntryCard({
       </p>
 
     </div>
+    <button
+  onClick={() =>
+    setShowEditModal(true)
+  }
+  className="
+    px-3 py-2
+    rounded-lg
+    bg-amber-500
+    text-white
+  "
+>
+  <Pencil size={14} />
+
+  Edit
+</button>
   </div>
+  
 
   {/* ACTIONS */}
 
@@ -669,6 +690,21 @@ export default function EntryCard({
 
           View
         </button>
+        <button
+  onClick={() =>
+    setShowEditModal(true)
+  }
+  className="
+    px-3 py-2
+    rounded-lg
+    bg-amber-500
+    text-white
+  "
+>
+  <Pencil size={14} />
+
+  Edit
+</button>
 
         {/* DELETE */}
 
@@ -763,6 +799,25 @@ export default function EntryCard({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+  {showEditModal && (
+    <EditEntryModal
+      open={
+        showEditModal
+      }
+      entry={entry}
+      onClose={() =>
+        setShowEditModal(
+          false
+        )
+      }
+      onSuccess={
+        onRefresh
+      }
+    />
+  )}
+</AnimatePresence>
     </motion.div>
   );
 }
