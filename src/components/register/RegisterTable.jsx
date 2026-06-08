@@ -424,7 +424,7 @@ export default function RegisterTable({
     transition-all
   "
 >
-  +20 Rows
+  +50 Rows
 </button>
         </div>
       </div>
