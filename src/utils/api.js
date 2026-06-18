@@ -372,6 +372,20 @@ export const fileApi = {
     api.get("/files"),
 };
 
+
+export const analyticsApi = {
+  summary: () =>
+    api.get(
+      "/analytics/summary"
+    ),
+
+  insights: () =>
+    api.get(
+      "/analytics/insights"
+    ),
+};
+
+
 /*
 ──────────────────────────────────────
 CALENDAR

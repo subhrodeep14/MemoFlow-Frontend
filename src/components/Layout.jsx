@@ -11,6 +11,8 @@ import {
   Bell,
   Search,
   Menu,
+  BarChart3,
+  FileText,
 } from "lucide-react";
 import {
   Building2,
@@ -315,12 +317,13 @@ const [
       className="
         relative
 
-        w-20
+        w-14
         h-14
 
         rounded-2xl
 
-        bg-white
+         bg-white/70
+           dark:bg-slate-950/70
      
         text-emerald-700
          dark:bg-emerald-200
@@ -338,16 +341,14 @@ const [
         overflow-hidden
       "
     >
-      <img
-        src={logo}
-        alt="MemoFlow"
-        className="
-          w-full
-          h-full
-          object-contain
-          p-1
-        "
-      />
+      <FileText
+  size={28}
+  strokeWidth={2.2}
+  className="
+    text-indigo-600
+    dark:text-indigo-500
+  "
+/>
     </div>
   </div>
 
@@ -464,34 +465,40 @@ const [
     </button>
   )}
 
-  <div
-    className="
-      hidden
-      xl:flex
+  <button
+  onClick={() =>
+    navigate("/analytics")
+  }
+  className="
+    hidden
+    md:flex
 
-      h-10
-      px-3
+    h-10
+    px-4
 
-      rounded-xl
+    rounded-xl
 
-      bg-violet-50
-      dark:bg-violet-500/10
+    bg-gradient-to-r
+    from-violet-600
+    to-indigo-600
 
-      items-center
-      gap-2
+    text-white
 
-      text-xs
-      font-semibold
+    text-xs
+    font-semibold
 
-      text-violet-700
-      dark:text-violet-300
-    "
-  >
-    {user?.role?.replace(
-      "_",
-      " "
-    )}
-  </div>
+    items-center
+    gap-2
+
+    hover:scale-105
+
+    transition-all
+  "
+>
+  <BarChart3 size={14} />
+
+  Analytics
+</button>
 
   {activeCompany && (
     <div

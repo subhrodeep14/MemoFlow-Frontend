@@ -25,6 +25,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 
 import CompanyManagementPage from "./pages/CompanyManagementPage";
+import Analytics from "./pages/Analytics";
 
 /*
 ──────────────────────────────────────
@@ -239,6 +240,15 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/analytics"
+  element={
+   <ProtectedRoute>
+    <Analytics />
+    </ProtectedRoute>
+  }
+/>
 
         {/* COMPANY PANEL */}
 
